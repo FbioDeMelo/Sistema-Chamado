@@ -1,0 +1,73 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Gráficos de Atendimentos</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body style="font-family: Arial; margin: 30px;">
+
+<h2>📊 Gráficos de Atendimentos</h2>
+
+<form id="filtroForm">
+    <label for="dias">Período (em dias):</label>
+    <input type="number" id="dias" name="dias" value="30" min="7" max="180" style="width: 80px;">
+    <button type="submit">Filtrar</button>
+</form>
+
+<canvas id="grafico" width="800" height="400"></canvas>
+
+<script>
+async function carregarGrafico(dias=30) {
+    const resp = await fetch(`/dashboard/data/?dias=${dias}`);
+    const data = await resp.json();
+
+    const ctx = document.getElementById('grafico').getContext('2d');
+    if (window.meuGrafico) window.meuGrafico.destroy();
+
+    window.meuGrafico = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.labels,
+            datasets: [
+                {
+                    label: 'Atendimentos Criados',
+                    borderColor: 'red',
+                    fill: false,
+                    data: data.atendimentos,
+                    tension: 0.3
+                },
+                {
+                    label: 'Atendimentos Concluídos',
+                    borderColor: 'green',
+                    fill: false,
+                    data: data.concluidos,
+                    tension: 0.3
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'bottom' }
+            },
+            scales: {
+                x: { title: { display: true, text: 'Data' } },
+                y: { title: { display: true, text: 'Quantidade' }, beginAtZero: true }
+            }
+        }
+    });
+}
+
+document.getElementById('filtroForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const dias = document.getElementById('dias').value;
+    carregarGrafico(dias);
+});
+
+carregarGrafico();
+</script>
+
+</body>
+</html>

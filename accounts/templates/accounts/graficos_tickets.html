@@ -1,0 +1,342 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ titulo }} - Sistema de Chamados</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --light: #f8fafc;
+            --dark: #1e293b;
+            --gray: #94a3b8;
+            --sidebar-width: 250px;
+        }
+        
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+        }
+        
+        body { 
+            background-color: #f1f5f9; 
+            color: var(--dark); 
+            display: flex; 
+            min-height: 100vh; 
+        }
+
+        /* Sidebar */
+        .sidebar { 
+            width: var(--sidebar-width); 
+            background: var(--dark); 
+            color: white; 
+            height: 100vh; 
+            position: fixed; 
+            padding: 20px 0; 
+            transition: all 0.3s; 
+        }
+        
+        .logo { 
+            text-align: center; 
+            padding: 20px 0; 
+            border-bottom: 1px solid #334155; 
+            margin-bottom: 20px; 
+        }
+        
+        .logo h2 { 
+            font-size: 1.5rem; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 10px; 
+        }
+        
+        .nav-links { 
+            list-style: none; 
+            padding: 0 15px; 
+        }
+        
+        .nav-links li { 
+            margin-bottom: 10px; 
+        }
+        
+        .nav-links a { 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            color: var(--gray); 
+            text-decoration: none; 
+            padding: 12px 15px; 
+            border-radius: 8px; 
+            transition: all 0.3s; 
+        }
+        
+        .nav-links i { 
+            width: 20px; 
+            text-align: center; 
+        }
+        
+        .nav-links a:hover,
+        .nav-links a.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        /* Main Content */
+        .main-content { 
+            flex: 1; 
+            margin-left: var(--sidebar-width); 
+            padding: 30px; 
+        }
+
+        /* Header */
+        .header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            background: white; 
+            padding: 15px 25px; 
+            border-radius: 10px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
+            margin-bottom: 25px; 
+        }
+        
+        .user-info { 
+            display: flex; 
+            align-items: center; 
+            gap: 15px; 
+        }
+        
+        .user-avatar { 
+            width: 45px; 
+            height: 45px; 
+            border-radius: 50%; 
+            background: var(--primary); 
+            color: white; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-weight: bold; 
+            font-size: 1.2rem; 
+        }
+        
+        .user-details h3 { 
+            margin-bottom: 5px; 
+        }
+        
+        .user-details p { 
+            color: var(--secondary); 
+            font-size: 0.9rem; 
+        }
+
+        /* Card Styles */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+            border-top: 4px solid var(--primary);
+        }
+        
+        .card h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+        
+        .card p {
+            text-align: center;
+            color: var(--secondary);
+            margin-bottom: 20px;
+        }
+
+        /* Button Styles */
+        .btn { 
+            display: inline-block; 
+            background: var(--primary); 
+            color: white; 
+            text-decoration: none; 
+            padding: 10px 20px; 
+            border-radius: 6px; 
+            font-weight: 500; 
+            transition: background 0.3s; 
+            border: none; 
+            cursor: pointer; 
+            text-align: center; 
+        }
+        
+        .btn:hover { 
+            background: var(--primary-dark); 
+        }
+
+        /* Filter Styles */
+        .filtro {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        select {
+            padding: 10px 15px;
+            border-radius: 6px;
+            border: 1px solid var(--gray);
+            background: white;
+            color: var(--dark);
+            font-size: 0.9rem;
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+        }
+
+        /* Chart Container */
+        canvas {
+            margin-top: 30px;
+            max-height: 400px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar { 
+                width: 70px; 
+                overflow: hidden; 
+            }
+            
+            .logo h2 span, 
+            .nav-links a span { 
+                display: none; 
+            }
+            
+            .nav-links a { 
+                justify-content: center; 
+                padding: 15px; 
+            }
+            
+            .main-content { 
+                margin-left: 70px; 
+                padding: 20px;
+            }
+            
+            .header { 
+                flex-direction: column; 
+                gap: 15px; 
+                text-align: center; 
+            }
+            
+            .card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">
+            <h2><i class="fas fa-headset"></i> <span>Chamados TI</span></h2>
+        </div>
+        <ul class="nav-links">
+            <li><a href="{% url 'index' %}"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
+
+            {% if user.role == 'colaborador' %}
+                <li><a href="{% url 'chamados_colaborador' %}"><i class="fas fa-plus"></i> <span>Abrir Chamado</span></a></li>
+                <li><a href="{% url 'chamados_colaborador' %}"><i class="fas fa-list"></i> <span>Meus Chamados</span></a></li>
+            {% elif user.role == 'tecnico' %}
+                <li><a href="{% url 'chamados_tecnico' %}"><i class="fas fa-tasks"></i> <span>Chamados Atribuídos</span></a></li>
+            {% elif user.role == 'admin' %}
+                <li><a href="{% url 'chamados_admin' %}"><i class="fas fa-users"></i> <span>Todos os Chamados</span></a></li>
+                <li><a href="{% url 'criar_usuario' %}"><i class="fas fa-user-plus"></i> <span>Criar Usuário</span></a></li>
+                <li><a href="{% url 'gerenciar_usuarios' %}"><i class="fas fa-user-cog"></i> <span>Gerenciar Usuários</span></a></li>
+                <li><a href="{% url 'graficos_tickets' %}" class="active"><i class="fas fa-chart-bar"></i> <span>Gráficos de Atendimentos</span></a></li>
+            {% endif %}
+
+            <li><a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> <span>Sair</span></a></li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        
+        <!-- Header -->
+        <div class="header">
+            <div class="user-info">
+                <div class="user-avatar">{{ request.user.username|first|upper }}</div>
+                <div class="user-details">
+                    <h3>Olá, {{ request.user.first_name|default:request.user.username }}!</h3>
+                    <p>{{ request.user.get_role_display }}</p>
+                </div>
+            </div>
+            <a href="{% url 'logout' %}" class="btn"><i class="fas fa-sign-out-alt"></i> Sair</a>
+        </div>
+
+        <!-- Content Card -->
+        <div class="card">
+            <h1>{{ titulo }}</h1>
+            <p>{{ descricao }}</p>
+
+            <div class="filtro">
+                <form method="get">
+                    <label>Período:</label>
+                    <select name="dias" onchange="this.form.submit()">
+                        <option value="7" {% if request.GET.dias == '7' %}selected{% endif %}>Últimos 7 dias</option>
+                        <option value="30" {% if request.GET.dias == '30' or not request.GET.dias %}selected{% endif %}>Últimos 30 dias</option>
+                        <option value="90" {% if request.GET.dias == '90' %}selected{% endif %}>Últimos 3 meses</option>
+                        <option value="180" {% if request.GET.dias == '180' %}selected{% endif %}>Últimos 6 meses</option>
+                    </select>
+                </form>
+            </div>
+
+            <canvas id="graficoTickets"></canvas>
+        </div>
+
+        <script>
+            const ctx = document.getElementById('graficoTickets').getContext('2d');
+            const grafico = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: {{ datas|safe }},
+                    datasets: [
+                        {
+                            label: 'Abertos',
+                            data: {{ abertos|safe }},
+                            backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Concluídos',
+                            data: {{ concluidos|safe }},
+                            backgroundColor: 'rgba(75, 192, 75, 0.5)',
+                            borderColor: 'rgba(75, 192, 75, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        title: { display: true, text: 'Tickets criados e concluídos por dia' }
+                    },
+                    scales: {
+                        x: { title: { display: true, text: 'Data' } },
+                        y: { beginAtZero: true, title: { display: true, text: 'Quantidade' } }
+                    }
+                }
+            });
+        </script>
+    </div>
+</body>
+</html>
