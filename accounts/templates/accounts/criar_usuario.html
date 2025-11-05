@@ -333,7 +333,6 @@
             <li><a href="{% url 'index' %}"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
 
             {% if user.role == 'colaborador' %}
-                <li><a href="{% url 'chamados_colaborador' %}"><i class="fas fa-plus"></i> <span>Abrir Chamado</span></a></li>
                 <li><a href="{% url 'chamados_colaborador' %}"><i class="fas fa-list"></i> <span>Meus Chamados</span></a></li>
             {% elif user.role == 'tecnico' %}
                 <li><a href="{% url 'chamados_tecnico' %}"><i class="fas fa-tasks"></i> <span>Chamados Atribuídos</span></a></li>

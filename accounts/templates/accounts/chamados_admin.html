@@ -54,7 +54,7 @@
         .btn-block { display: block; width: 100%; }
 
         /* Footer */
-        .footer { text-align: center; margin-top: 40px; padding: 20px; color: var(--secondary); font-size: 0.9rem; }
+        .footer { text-align: center; margin-top: 400px; padding: 20px; color: var(--secondary); font-size: 0.9rem; }
 
         /* Responsive */
         @media (max-width: 768px) {
@@ -64,12 +64,13 @@
             .main-content { margin-left: 70px; }
             .header { flex-direction: column; gap: 15px; text-align: center; }
         }
+        .nav-links a:hover, .nav-links a.active {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
     </style>
 </head>
 <body>
-
-    <!-- Sidebar -->
-    <!-- Sidebar -->
     <div class="sidebar">
         <div class="logo">
             <h2><i class="fas fa-headset"></i> <span>Chamados TI</span></h2>
@@ -78,13 +79,12 @@
             <li><a href="{% url 'index' %}"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
 
             {% if user.role == 'colaborador' %}
-                <li><a href="{% url 'chamados_colaborador' %}"><i class="fas fa-plus"></i> <span>Abrir Chamado</span></a></li>
                 <li><a href="{% url 'chamados_colaborador' %}"><i class="fas fa-list"></i> <span>Meus Chamados</span></a></li>
             {% elif user.role == 'tecnico' %}
                 <li><a href="{% url 'chamados_tecnico' %}"><i class="fas fa-tasks"></i> <span>Chamados Atribuídos</span></a></li>
             {% elif user.role == 'admin' %}
-                <li><a href="{% url 'chamados_admin' %}"><i class="fas fa-users"></i> <span>Todos os Chamados</span></a></li>
-                <li><a href="{% url 'criar_usuario' %}" class="active"><i class="fas fa-user-plus"></i> <span>Criar Usuário</span></a></li>
+                <li><a href="{% url 'chamados_admin' %}" class="active"><i class="fas fa-users"></i> <span>Todos os Chamados</span></a></li>
+                <li><a href="{% url 'criar_usuario' %}"><i class="fas fa-user-plus"></i> <span>Criar Usuário</span></a></li>
                 <li><a href="{% url 'gerenciar_usuarios' %}"><i class="fas fa-user-cog"></i> <span>Gerenciar Usuários</span></a></li>
                 <li><a href="{% url 'graficos_tickets' %}"><i class="fas fa-chart-bar"></i> <span>Gráficos de Atendimentos</span></a></li>
             {% endif %}
@@ -92,12 +92,7 @@
             <li><a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> <span>Sair</span></a></li>
         </ul>
     </div>
-
-    <!-- Main Content -->
     <div class="main-content">
-
-        <!-- Header -->
-        <!-- Header -->
         <div class="header">
             <div class="user-info">
                 <div class="user-avatar">{{ request.user.username|first|upper }}</div>
@@ -108,9 +103,6 @@
             </div>
             <a href="{% url 'logout' %}" class="btn"><i class="fas fa-sign-out-alt"></i> Sair</a>
         </div>
-
-
-<!-- Lista de Chamados -->
 <h2 class="section-title">Todos os Chamados</h2>
 <div class="card-container">
     {% for chamado in todos_chamados %}
@@ -133,12 +125,27 @@
             <p>Não há chamados cadastrados.</p>
         </div>
     {% endfor %}
+    
+</div>
+<a href="{% url 'index' %}" class="btn" style="margin-top: 20px;"><i class="fas fa-arrow-left"></i> Voltar</a>
+<div class="pagination">
+  <span class="step-links">
+    {% if todos_chamados.has_previous %}
+      <a href="?page=1">&laquo; primeira</a>
+      <a href="?page={{ todos_chamados.previous_page_number }}">anterior</a>
+    {% endif %}
+
+    <span class="current">
+      Página {{ todos_chamados.number }} de {{ todos_chamados.paginator.num_pages }}.
+    </span>
+
+    {% if todos_chamados.has_next %}
+      <a href="?page={{ todos_chamados.next_page_number }}">próxima</a>
+      <a href="?page={{ todos_chamados.paginator.num_pages }}">última &raquo;</a>
+    {% endif %}
+  </span>
 </div>
 
-<!-- Voltar -->
-<a href="{% url 'index' %}" class="btn" style="margin-top: 20px;"><i class="fas fa-arrow-left"></i> Voltar</a>
-
-        <!-- Footer -->
         <div class="footer">
             <p>Sistema de Chamados TI &copy; {% now "Y" %} - Todos os direitos reservados</p>
         </div>

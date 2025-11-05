@@ -60,7 +60,7 @@
         .messages p { padding: 10px; border-radius: 6px; margin-bottom: 10px; background: #fef3c7; color: var(--warning); }
 
         /* Footer */
-        .footer { text-align: center; margin-top: 40px; padding: 20px; color: var(--secondary); font-size: 0.9rem; }
+        .footer { text-align: center; margin-top: 400px; padding: 20px; color: var(--secondary); font-size: 0.9rem; }
 
         /* Responsive */
         @media (max-width: 768px) {
@@ -83,6 +83,44 @@
     cursor: pointer;
     text-align: center;
 }
+/* Modal background */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5);
+}
+
+/* Modal content box */
+.modal-content {
+    background-color: #fff;
+    margin: 10% auto;
+    padding: 20px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    position: relative;
+}
+
+/* Close button */
+.close {
+    color: #aaa;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+.close:hover {
+    color: #000;
+}
     </style>
 </head>
 <body>
@@ -96,13 +134,12 @@
             <li><a href="{% url 'index' %}"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
 
             {% if user.role == 'colaborador' %}
-                <li><a href="{% url 'chamados_colaborador' %}"><i class="fas fa-plus"></i> <span>Abrir Chamado</span></a></li>
                 <li><a href="{% url 'chamados_colaborador' %}"><i class="fas fa-list"></i> <span>Meus Chamados</span></a></li>
             {% elif user.role == 'tecnico' %}
                 <li><a href="{% url 'chamados_tecnico' %}"><i class="fas fa-tasks"></i> <span>Chamados Atribuídos</span></a></li>
             {% elif user.role == 'admin' %}
                 <li><a href="{% url 'chamados_admin' %}"><i class="fas fa-users"></i> <span>Todos os Chamados</span></a></li>
-                <li><a href="{% url 'criar_usuario' %}" class="active"><i class="fas fa-user-plus"></i> <span>Criar Usuário</span></a></li>
+                <li><a href="{% url 'criar_usuario' %}" ><i class="fas fa-user-plus"></i> <span>Criar Usuário</span></a></li>
                 <li><a href="{% url 'gerenciar_usuarios' %}"><i class="fas fa-user-cog"></i> <span>Gerenciar Usuários</span></a></li>
                 <li><a href="{% url 'graficos_tickets' %}"><i class="fas fa-chart-bar"></i> <span>Gráficos de Atendimentos</span></a></li>
             {% endif %}
@@ -110,11 +147,7 @@
             <li><a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> <span>Sair</span></a></li>
         </ul>
     </div>
-
-    <!-- Main Content -->
     <div class="main-content">
-        <!-- Header -->
-        <!-- Header -->
         <div class="header">
             <div class="user-info">
                 <div class="user-avatar">{{ request.user.username|first|upper }}</div>
@@ -123,9 +156,8 @@
                     <p>{{ request.user.get_role_display }}</p>
                 </div>
             </div>
-            <a href="{% url 'logout' %}" class="btn"><i class="fas fa-sign-out-alt"></i> Sair</a>
+<button id="openModalBtn" class="btn"><i class="fas fa-plus-circle"></i> Abrir Novo Chamado</button>
         </div>
-        <!-- Seus Chamados -->
         <h2 class="section-title">Seus Chamados</h2>
         <div class="card-container">
             {% for chamado in chamados %}
@@ -139,17 +171,36 @@
                 </div>
             {% endfor %}
         </div>
+        <div class="pagination">
+  <span class="step-links">
+    {% if todos_chamados.has_previous %}
+      <a href="?page=1">&laquo; primeira</a>
+      <a href="?page={{ todos_chamados.previous_page_number }}">anterior</a>
+    {% endif %}
 
-        <!-- Formulário para Abrir Novo Chamado -->
-        <h2 class="section-title">Abrir Novo Chamado</h2>
+    <span class="current">
+      Página {{ todos_chamados.number }} de {{ todos_chamados.paginator.num_pages }}.
+    </span>
+
+    {% if todos_chamados.has_next %}
+      <a href="?page={{ todos_chamados.next_page_number }}">próxima</a>
+      <a href="?page={{ todos_chamados.paginator.num_pages }}">última &raquo;</a>
+    {% endif %}
+  </span>
+</div>
+
+<div id="modalChamado" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Abrir Novo Chamado</h2>
         <form method="post">
             {% csrf_token %}
             <input type="text" name="titulo" placeholder="Título" required>
             <textarea name="descricao" placeholder="Descrição" required></textarea>
-            <button type="submit"><i class="fas fa-plus-circle"></i> Abrir Chamado</button>
+            <button type="submit"><i class="fas fa-paper-plane"></i> Enviar Chamado</button>
         </form>
-
-        <!-- Mensagens -->
+    </div>
+</div>
         {% if messages %}
         <div class="messages">
             {% for message in messages %}
@@ -157,12 +208,32 @@
             {% endfor %}
         </div>
         {% endif %}
-
-        <!-- Footer -->
         <div class="footer">
             <p>Sistema de Chamados TI &copy; {% now "Y" %} - Todos os direitos reservados</p>
         </div>
     </div>
 
+    <script>
+        // Abrir modal
+var modal = document.getElementById("modalChamado");
+var btn = document.getElementById("openModalBtn");
+var span = document.getElementsByClassName("close")[0];
+
+btn.onclick = function() {
+    modal.style.display = "block";
+}
+
+// Fechar modal ao clicar no X
+span.onclick = function() {
+    modal.style.display = "none";
+}
+
+// Fechar modal ao clicar fora do conteúdo
+window.onclick = function(event) {
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}
+    </script>
 </body>
 </html>

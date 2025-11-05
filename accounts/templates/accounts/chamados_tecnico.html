@@ -56,7 +56,7 @@
         button:hover { background: var(--primary-dark); }
 
         /* Footer */
-        .footer { text-align: center; margin-top: 40px; padding: 20px; color: var(--secondary); font-size: 0.9rem; }
+        .footer { text-align: center; margin-top: 400px; padding: 20px; color: var(--secondary); font-size: 0.9rem; }
 
         /* Responsive */
         @media (max-width: 768px) {
@@ -80,7 +80,6 @@
             <li><a href="{% url 'index' %}"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
 
             {% if user.role == 'colaborador' %}
-                <li><a href="{% url 'chamados_colaborador' %}"><i class="fas fa-plus"></i> <span>Abrir Chamado</span></a></li>
                 <li><a href="{% url 'chamados_colaborador' %}"><i class="fas fa-list"></i> <span>Meus Chamados</span></a></li>
             {% elif user.role == 'tecnico' %}
                 <li><a href="{% url 'chamados_tecnico' %}"><i class="fas fa-tasks"></i> <span>Chamados Atribuídos</span></a></li>
@@ -97,7 +96,6 @@
 
     <!-- Main Content -->
     <div class="main-content">
-        <!-- Header -->
         <!-- Header -->
         <div class="header">
             <div class="user-info">
@@ -129,7 +127,24 @@
                 </div>
             {% endfor %}
         </div>
+<!-- Paginação para chamados ativos -->
+<div class="pagination">
+  <span class="step-links">
+    {% if chamados_ativos.has_previous %}
+      <a href="?page_ativos=1">&laquo; primeira</a>
+      <a href="?page_ativos={{ chamados_ativos.previous_page_number }}">anterior</a>
+    {% endif %}
 
+    <span class="current">
+      Página {{ chamados_ativos.number }} de {{ chamados_ativos.paginator.num_pages }}.
+    </span>
+
+    {% if chamados_ativos.has_next %}
+      <a href="?page_ativos={{ chamados_ativos.next_page_number }}">próxima</a>
+      <a href="?page_ativos={{ chamados_ativos.paginator.num_pages }}">última &raquo;</a>
+    {% endif %}
+  </span>
+</div>
         <!-- Chamados Concluídos -->
         <h2 class="section-title">Chamados Concluídos</h2>
         <div class="card-container">
@@ -152,6 +167,25 @@
                 </div>
             {% endfor %}
         </div>
+<!-- Paginação para chamados concluídos -->
+<div class="pagination">
+  <span class="step-links">
+    {% if chamados_concluidos.has_previous %}
+      <a href="?page_concluidos=1">&laquo; primeira</a>
+      <a href="?page_concluidos={{ chamados_concluidos.previous_page_number }}">anterior</a>
+    {% endif %}
+
+    <span class="current">
+      Página {{ chamados_concluidos.number }} de {{ chamados_concluidos.paginator.num_pages }}.
+    </span>
+
+    {% if chamados_concluidos.has_next %}
+      <a href="?page_concluidos={{ chamados_concluidos.next_page_number }}">próxima</a>
+      <a href="?page_concluidos={{ chamados_concluidos.paginator.num_pages }}">última &raquo;</a>
+    {% endif %}
+  </span>
+</div>
+
 
         <!-- Footer -->
         <div class="footer">

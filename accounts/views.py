@@ -41,22 +41,22 @@ from .models import Ticket
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
+from django.core.paginator import Paginator
 
 # --- Tela principal de chamados ---
 @login_required
 def chamados_colaborador(request):
-    """
-    Tela de chamados — acessível para colaboradores e administradores.
-    Ambos podem criar chamados (máx. 3 ativos por usuário).
-    """
     if request.user.role not in ['colaborador', 'admin']:
-        return redirect('index')  # bloqueia técnicos
+        return redirect('index')
 
-    chamados = Ticket.objects.filter(colaborador=request.user)
+    chamados_list = Ticket.objects.filter(colaborador=request.user)
 
-    # Verifica se pode criar novo chamado (máx 3 ativos)
+    paginator = Paginator(chamados_list, 5)  # 5 chamados por página
+    page_number = request.GET.get('page')
+    chamados = paginator.get_page(page_number)
+
     if request.method == 'POST':
-        ativos = chamados.filter(status='ativo').count()
+        ativos = chamados_list.filter(status='ativo').count()
         if ativos >= 3:
             messages.error(request, "Você já possui 3 chamados ativos.")
         else:
@@ -76,12 +76,20 @@ def chamados_colaborador(request):
 @login_required
 def chamados_tecnico(request):
     if request.user.role != 'tecnico':
-        return redirect('home')  # bloqueia outros usuários
+        return redirect('home')
 
-    chamados_ativos = Ticket.objects.filter(status='ativo')
-    chamados_concluidos = Ticket.objects.filter(status='concluido')
+    chamados_ativos_list = Ticket.objects.filter(status='ativo')
+    chamados_concluidos_list = Ticket.objects.filter(status='concluido')
 
-    # Fechar chamado
+    paginator_ativos = Paginator(chamados_ativos_list, 5)
+    paginator_concluidos = Paginator(chamados_concluidos_list, 5)
+
+    page_number_ativos = request.GET.get('page_ativos')
+    page_number_concluidos = request.GET.get('page_concluidos')
+
+    chamados_ativos = paginator_ativos.get_page(page_number_ativos)
+    chamados_concluidos = paginator_concluidos.get_page(page_number_concluidos)
+
     if request.method == 'POST':
         ticket_id = request.POST.get('ticket_id')
         ticket = Ticket.objects.get(id=ticket_id)
@@ -90,7 +98,6 @@ def chamados_tecnico(request):
         ticket.tecnico = request.user
         ticket.save()
         messages.success(request, "Chamado concluído!")
-
         return redirect('chamados_tecnico')
 
     return render(request, 'accounts/chamados_tecnico.html', {
@@ -98,14 +105,20 @@ def chamados_tecnico(request):
         'chamados_concluidos': chamados_concluidos
     })
 
+
 # --- Tela para admin (visualizar tudo) ---
 @login_required
 def chamados_admin(request):
     if request.user.role != 'admin':
         return redirect('index')
 
-    todos_chamados = Ticket.objects.all()
+    todos_chamados_list = Ticket.objects.all()
+    paginator = Paginator(todos_chamados_list, 10)  # 10 chamados por página
+    page_number = request.GET.get('page')
+    todos_chamados = paginator.get_page(page_number)
+
     return render(request, 'accounts/chamados_admin.html', {'todos_chamados': todos_chamados})
+
 from django.shortcuts import redirect
 
 @login_required
@@ -269,11 +282,11 @@ def graficos_tickets(request):
     abertos = []
     concluidos = []
 
-    for i in range(dias):
-        dia = inicio + timedelta(days=i)
-        datas.append(dia.strftime('%d/%m'))
-        abertos.append(tickets.filter(data_criacao__date=dia).count())
-        concluidos.append(tickets.filter(status='concluido', data_fechamento__date=dia).count())
+    for i in range(dias + 1):
+      dia = inicio + timedelta(days=i)
+      datas.append(dia.strftime('%d/%m'))
+      abertos.append(tickets.filter(data_criacao__date=dia).count())
+      concluidos.append(tickets.filter(status='concluido', data_fechamento__date=dia).count())
 
     contexto = {
         'titulo': 'Gráficos de Tickets',
