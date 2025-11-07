@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect  # render = mostra o HTML; redirect = redireciona pra outra página
 from django.contrib.auth import authenticate, login, logout  # funções prontas do Django para login/logout
 from django.contrib import messages  # permite exibir mensagens de erro ou sucesso
+from django.core.mail import send_mail
 
 # --- VIEW DE LOGIN ---
 def login_view(request):
@@ -44,6 +45,9 @@ from django.utils import timezone
 from django.core.paginator import Paginator
 
 # --- Tela principal de chamados ---
+from django.core.mail import send_mail
+from django.conf import settings
+
 @login_required
 def chamados_colaborador(request):
     if request.user.role not in ['colaborador', 'admin']:
@@ -62,17 +66,46 @@ def chamados_colaborador(request):
         else:
             titulo = request.POST.get('titulo')
             descricao = request.POST.get('descricao')
-            Ticket.objects.create(
+
+            # Cria o ticket
+            novo_ticket = Ticket.objects.create(
                 titulo=titulo,
                 descricao=descricao,
                 colaborador=request.user
             )
-            messages.success(request, "Chamado criado com sucesso!")
+
+            # --- Envio de e-mail automático ---
+            assunto = f"Novo chamado aberto: {novo_ticket.titulo}"
+            mensagem = (
+                f"Olá {request.user.username},\n\n"
+                f"Seu chamado foi aberto com sucesso!\n\n"
+                f"Detalhes do chamado:\n"
+                f"Título: {novo_ticket.titulo}\n"
+                f"Descrição: {novo_ticket.descricao}\n"
+                f"Status atual: {novo_ticket.status}\n\n"
+                f"Em breve, um técnico entrará em contato.\n\n"
+                f"Atenciosamente,\nEquipe de Suporte"
+            )
+            print(">>> Enviando e-mail para:", request.user.email)
+
+            # Envia e-mail ao colaborador
+            send_mail(
+                assunto,
+                mensagem,
+                settings.DEFAULT_FROM_EMAIL,
+                [request.user.email],
+                fail_silently=False,
+            )
+
+            messages.success(request, "Chamado criado com sucesso! Um e-mail de confirmação foi enviado.")
             return redirect('chamados_colaborador')
 
     return render(request, 'accounts/chamados_colaborador.html', {'chamados': chamados})
 
 # --- Tela de chamados para técnico ---
+from django.core.mail import send_mail
+from django.conf import settings
+
 @login_required
 def chamados_tecnico(request):
     if request.user.role != 'tecnico':
@@ -97,7 +130,29 @@ def chamados_tecnico(request):
         ticket.data_fechamento = timezone.now()
         ticket.tecnico = request.user
         ticket.save()
-        messages.success(request, "Chamado concluído!")
+
+        # --- Envio de e-mail automático ao colaborador ---
+        assunto = f"Chamado concluído: {ticket.titulo}"
+        mensagem = (
+            f"Olá {ticket.colaborador.username},\n\n"
+            f"Seu chamado foi concluído com sucesso!\n\n"
+            f"Detalhes do chamado:\n"
+            f"Título: {ticket.titulo}\n"
+            f"Concluído por: {request.user.username}\n"
+            f"Data de fechamento: {ticket.data_fechamento.strftime('%d/%m/%Y %H:%M')}\n\n"
+            f"Agradecemos por utilizar nosso suporte.\n"
+            f"Atenciosamente,\nEquipe de Suporte"
+        )
+
+        send_mail(
+            assunto,
+            mensagem,
+            settings.DEFAULT_FROM_EMAIL,
+            [ticket.colaborador.email],  # envia para o dono do chamado
+            fail_silently=False,
+        )
+
+        messages.success(request, "Chamado concluído! E-mail enviado ao colaborador.")
         return redirect('chamados_tecnico')
 
     return render(request, 'accounts/chamados_tecnico.html', {
@@ -221,7 +276,6 @@ def index_geral(request):
         return redirect('logout')
 
     return render(request, 'accounts/index.html', {'cards': cards})
-
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 

@@ -64,6 +64,41 @@
     background: rgba(255, 255, 255, 0.1);
     color: white;
 }
+/* Preloader */
+#preloader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+.spinner {
+    width: 60px;
+    height: 60px;
+    border: 6px solid var(--primary);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+#preloader.fade-out {
+    opacity: 0;
+    visibility: hidden;
+}
+
     </style>
 </head>
 <body>
@@ -88,7 +123,9 @@
         <li><a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> <span>Sair</span></a></li>
     </ul>
 </div>
-
+<div id="preloader">
+    <div class="spinner"></div>
+</div>
 
     <!-- Main Content -->
     <div class="main-content">
@@ -123,5 +160,14 @@
                 </div>
             {% endfor %}
         </div>
+        <script>
+    window.addEventListener('load', function() {
+        const preloader = document.getElementById('preloader');
+        preloader.classList.add('fade-out');
+        setTimeout(() => preloader.style.display = 'none', 500); // total transition time
+    });
+</script>
+
 </body>
+
 </html>

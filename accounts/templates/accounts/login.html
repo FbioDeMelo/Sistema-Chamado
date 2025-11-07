@@ -462,6 +462,35 @@
         .login-container > *:nth-child(6) { animation-delay: 0.6s; }
         .login-container > *:nth-child(7) { animation-delay: 0.7s; }
         .login-container > *:nth-child(8) { animation-delay: 0.8s; }
+        /* Preloader */
+#preloader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.spinner {
+    width: 60px;
+    height: 60px;
+    border: 6px solid var(--primary);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
     </style>
 </head>
 <body>
@@ -476,7 +505,6 @@
                     Gerencie todos os seus chamados de suporte em um só lugar. 
                     Acesso rápido e seguro para sua equipe.
                 </p>
-                
                 <div class="features">
                     <div class="feature">
                         <i class="fas fa-check"></i>
@@ -493,7 +521,6 @@
                 </div>
             </div>
         </div>
-        
         <div class="login-container">
             <div class="logo">
                 <i class="fas fa-headset logo-icon"></i>
@@ -502,9 +529,7 @@
             
             <h3>Bem-vindo de volta</h3>
             <p class="subtitle">Faça login para acessar sua conta</p>
-            
-            <!-- Mensagens (erro, sucesso, aviso) -->
-            {% if messages %}
+                        {% if messages %}
                 {% for message in messages %}
                     <div class="message 
                         {% if message.tags %}{{ message.tags }}{% endif %}">
@@ -512,20 +537,17 @@
                     </div>
                 {% endfor %}
             {% endif %}
-
             <form method="post">
                 {% csrf_token %}
                 <div class="form-group">
                     <i class="fas fa-envelope input-icon"></i>
                     <input type="email" name="email" placeholder="E-mail" required>
                 </div>
-                
                 <div class="form-group">
                     <i class="fas fa-lock input-icon"></i>
                     <input type="password" name="password" id="password" placeholder="Senha" required>
                     <i class="fas fa-eye password-toggle" id="togglePassword"></i>
                 </div>
-                
                 <div class="options">
                     <div class="remember">
                         <input type="checkbox" id="remember" name="remember">
@@ -533,13 +555,14 @@
                     </div>
                     <a href="#" class="forgot-password">Esqueceu a senha?</a>
                 </div>
-                
                 <button type="submit">
                     <i class="fas fa-sign-in-alt button-icon"></i> Entrar
                 </button>
             </form>
     </div>
-
+<div id="preloader" style="display: none;">
+    <div class="spinner"></div>
+</div>
     <script>
         // Toggle password visibility
         document.getElementById('togglePassword').addEventListener('click', function() {
@@ -582,6 +605,10 @@
             btn.addEventListener('mouseleave', function() {
                 this.style.transform = 'translateY(0)';
             });
+        });
+        document.querySelector('form').addEventListener('submit', function () {
+    const preloader = document.getElementById('preloader');
+    preloader.style.display = 'flex';
         });
     </script>
 </body>

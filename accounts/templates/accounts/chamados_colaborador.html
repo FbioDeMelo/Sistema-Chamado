@@ -121,6 +121,100 @@
 .close:hover {
     color: #000;
 }
+/* Preloader */
+#preloader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+.spinner {
+    width: 60px;
+    height: 60px;
+    border: 6px solid var(--primary);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+#preloader.fade-out {
+    opacity: 0;
+    visibility: hidden;
+}
+.pagination {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.pagination .step-links a,
+.pagination .step-links .current {
+    display: inline-block;
+    padding: 8px 12px;
+    margin: 0 4px;
+    text-decoration: none;
+    color: white;
+    background-color: #007bff;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.pagination .step-links a:hover {
+    background-color: #0056b3;
+}
+
+.pagination .step-links .current {
+    background-color: #6c757d;
+    cursor: default;
+}
+/* Fundo semitransparente cobrindo a tela */
+#loading-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+/* Animação do spinner */
+.spinner {
+    border: 6px solid #f3f3f3;
+    border-top: 6px solid #3498db;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+#loading-text {
+    margin-top: 15px;
+    font-weight: bold;
+    color: #333;
+}
     </style>
 </head>
 <body>
@@ -171,20 +265,20 @@
                 </div>
             {% endfor %}
         </div>
-        <div class="pagination">
+<div class="pagination">
   <span class="step-links">
-    {% if todos_chamados.has_previous %}
+    {% if chamados.has_previous %}
       <a href="?page=1">&laquo; primeira</a>
-      <a href="?page={{ todos_chamados.previous_page_number }}">anterior</a>
+      <a href="?page={{ chamados.previous_page_number }}">anterior</a>
     {% endif %}
 
     <span class="current">
-      Página {{ todos_chamados.number }} de {{ todos_chamados.paginator.num_pages }}.
+      Página {{ chamados.number }} de {{ chamados.paginator.num_pages }}.
     </span>
 
-    {% if todos_chamados.has_next %}
-      <a href="?page={{ todos_chamados.next_page_number }}">próxima</a>
-      <a href="?page={{ todos_chamados.paginator.num_pages }}">última &raquo;</a>
+    {% if chamados.has_next %}
+      <a href="?page={{ chamados.next_page_number }}">próxima</a>
+      <a href="?page={{ chamados.paginator.num_pages }}">última &raquo;</a>
     {% endif %}
   </span>
 </div>
@@ -201,6 +295,11 @@
         </form>
     </div>
 </div>
+<div id="loading-overlay">
+    <div class="spinner"></div>
+    <div id="loading-text">Enviando chamado...</div>
+</div>
+
         {% if messages %}
         <div class="messages">
             {% for message in messages %}
@@ -212,7 +311,9 @@
             <p>Sistema de Chamados TI &copy; {% now "Y" %} - Todos os direitos reservados</p>
         </div>
     </div>
-
+<div id="preloader">
+    <div class="spinner"></div>
+</div>  
     <script>
         // Abrir modal
 var modal = document.getElementById("modalChamado");
@@ -234,6 +335,21 @@ window.onclick = function(event) {
         modal.style.display = "none";
     }
 }
+    window.addEventListener('load', function() {
+        const preloader = document.getElementById('preloader');
+        preloader.classList.add('fade-out');
+        setTimeout(() => preloader.style.display = 'none', 500); // total transition time
+    });
+    document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('#modalChamado form');
+    const loadingOverlay = document.getElementById('loading-overlay');
+
+    form.addEventListener('submit', function() {
+        loadingOverlay.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+
+    });
+});
     </script>
 </body>
 </html>

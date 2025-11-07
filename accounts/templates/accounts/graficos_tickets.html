@@ -239,6 +239,21 @@
                 padding: 20px;
             }
         }
+        .spinner {
+    width: 60px;
+    height: 60px;
+    border: 6px solid var(--primary);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
     </style>
 </head>
 <body>
@@ -296,45 +311,57 @@
                     </select>
                 </form>
             </div>
-
-            <canvas id="graficoTickets"></canvas>
+<div id="chart-container" style="position: relative; height: 400px;">
+    <div id="chart-loader" style="display: flex; align-items: center; justify-content: center; height: 100%;">
+        <div class="spinner"></div>
+    </div>
+    <canvas id="graficoTickets" style="display: none;"></canvas>
+</div>
         </div>
 
         <script>
-            const ctx = document.getElementById('graficoTickets').getContext('2d');
-            const grafico = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: {{ datas|safe }},
-                    datasets: [
-                        {
-                            label: 'Abertos',
-                            data: {{ abertos|safe }},
-                            backgroundColor: 'rgba(255, 99, 132, 0.5)',
-                            borderColor: 'rgba(255, 99, 132, 1)',
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'Concluídos',
-                            data: {{ concluidos|safe }},
-                            backgroundColor: 'rgba(75, 192, 75, 0.5)',
-                            borderColor: 'rgba(75, 192, 75, 1)',
-                            borderWidth: 1
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { position: 'bottom' },
-                        title: { display: true, text: 'Tickets criados e concluídos por dia' }
+ window.addEventListener('load', function() {
+        const ctx = document.getElementById('graficoTickets').getContext('2d');
+
+        // Inicializa o gráfico
+        const grafico = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: {{ datas|safe }},
+                datasets: [
+                    {
+                        label: 'Abertos',
+                        data: {{ abertos|safe }},
+                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
                     },
-                    scales: {
-                        x: { title: { display: true, text: 'Data' } },
-                        y: { beginAtZero: true, title: { display: true, text: 'Quantidade' } }
+                    {
+                        label: 'Concluídos',
+                        data: {{ concluidos|safe }},
+                        backgroundColor: 'rgba(75, 192, 75, 0.5)',
+                        borderColor: 'rgba(75, 192, 75, 1)',
+                        borderWidth: 1
                     }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' },
+                    title: { display: true, text: 'Tickets criados e concluídos por dia' }
+                },
+                scales: {
+                    x: { title: { display: true, text: 'Data' } },
+                    y: { beginAtZero: true, title: { display: true, text: 'Quantidade' } }
                 }
-            });
+            }
+        });
+
+        // Após o gráfico ser renderizado, esconde o loader e mostra o gráfico
+        document.getElementById('chart-loader').style.display = 'none';
+        document.getElementById('graficoTickets').style.display = 'block';
+    });
         </script>
     </div>
 </body>
