@@ -2,23 +2,36 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
+from django.core.validators import RegexValidator
+
+# --- Validador personalizado ---
+nome_usuario_validator = RegexValidator(
+    regex=r'^[\w\sáàâãäéèêëíìîïóòôõöúùûüçÇÁÀÂÃÄÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜ-]+$',
+    message="O nome de usuário pode conter letras, espaços, acentos e traços."
+)
 
 # --- Modelo de usuário customizado ---
 class CustomUser(AbstractUser):
-    # Definimos os tipos de usuário
     ROLES = (
         ('colaborador', 'Colaborador'),
         ('tecnico', 'Técnico'),
         ('admin', 'Administrador'),
     )
+
     role = models.CharField(max_length=20, choices=ROLES, default='colaborador')
 
-    # Tornar o e-mail obrigatório e único
     email = models.EmailField(unique=True)
 
-    # Definir e-mail como campo principal para login
-    USERNAME_FIELD = 'email'  # campo que será usado para autenticação
-    REQUIRED_FIELDS = ['username']  # campos obrigatórios além do e-mail
+    # Campo username personalizado
+    username = models.CharField(
+        max_length=150,
+        unique=True,
+        validators=[nome_usuario_validator],
+        help_text="Pode conter letras, espaços e acentos.",
+    )
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username']
 
     def __str__(self):
         return f"{self.username} ({self.role})"
@@ -66,3 +79,11 @@ class Chamado(models.Model):
 
     def __str__(self):
         return self.titulo
+class Mensagem(models.Model):
+    ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE, related_name='mensagens')
+    autor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    texto = models.TextField()
+    data_envio = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.autor.username} - {self.ticket.titulo} - {self.data_envio.strftime('%d/%m %H:%M')}"

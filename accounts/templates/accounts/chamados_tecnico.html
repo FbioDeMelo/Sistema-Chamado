@@ -67,38 +67,54 @@
             .header { flex-direction: column; gap: 15px; text-align: center; }
         }
         /* Preloader */
+/* Preloader */
 #preloader {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: #f1f5f9;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-    transition: opacity 0.5s ease, visibility 0.5s ease;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.2); /* leve overlay escuro */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
 }
 
-.spinner {
-    width: 60px;
-    height: 60px;
-    border: 6px solid var(--primary);
-    border-top-color: transparent;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
+.loader {
+  width: 60px;
+  aspect-ratio: 2;
+  --_g: no-repeat radial-gradient(circle closest-side, var(--primary) 90%, #0000);
+  background:
+    var(--_g) 0%   50%,
+    var(--_g) 50%  50%,
+    var(--_g) 100% 50%;
+  background-size: calc(100%/3) 50%;
+  animation: l3 1s infinite linear;
 }
 
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
+@keyframes l3 {
+  20% { background-position: 0%   0%, 50%  50%, 100% 50%; }
+  40% { background-position: 0% 100%, 50%   0%, 100% 50%; }
+  60% { background-position: 0%  50%, 50% 100%, 100%  0%; }
+  80% { background-position: 0%  50%, 50%  50%, 100% 100%; }
 }
 
 #preloader.fade-out {
-    opacity: 0;
-    visibility: hidden;
+  opacity: 0;
+  visibility: hidden;
+}
+.logo-img {
+    width: 180px;
+    height: auto;
+    display: block;
+    margin: 20px auto;
+    content: url("https://institutolibano.com.br/_next/image?url=%2Froot%2Flogo-website-branca.webp&w=384&q=75");
+}
+/* Quando estiver em modo mobile */
+@media (max-width: 768px) {
+    .logo-img {
+        content: url("https://artigos.libanoeducacional.com.br/cropped-logo-270x270.webp"); /* <- Coloque aqui a imagem para mobile */
+        width: 40px;
+    }
 }
 .btn {
     display: inline-block;
@@ -208,13 +224,29 @@
     background-color: #6c757d;
     cursor: default;
 }
+.logo-img {
+    width: 180px;
+    height: auto;
+    display: block;
+    margin: 20px auto;
+    content: url("https://institutolibano.com.br/_next/image?url=%2Froot%2Flogo-website-branca.webp&w=384&q=75");
+}
+/* Quando estiver em modo mobile */
+@media (max-width: 768px) {
+    .logo-img {
+        content: url("https://artigos.libanoeducacional.com.br/cropped-logo-270x270.webp"); /* <- Coloque aqui a imagem para mobile */
+        width: 40px;
+    }
+}
     </style>
 </head>
 <body>
-    <div class="sidebar">
-        <div class="logo">
-            <h2><i class="fas fa-headset"></i> <span>Chamados TI</span></h2>
-        </div>
+<div class="sidebar">
+    <div class="logo">
+        <img class="logo-img" 
+             src="https://institutolibano.com.br/_next/image?url=%2Froot%2Flogo-website-branca.webp&w=384&q=75" 
+             alt="Instituto Líbano">
+    </div>
         <ul class="nav-links">
             <li><a href="{% url 'index' %}"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
 
@@ -260,7 +292,13 @@
     <button type="button" onclick="abrirModal('{{ chamado.titulo }}', this.form)">
         <i class="fas fa-check-circle"></i> Fechar Chamado
     </button>
+    <button type="button" class="btn-open-chat-tecnico" 
+            data-ticket-id="{{ chamado.id }}" 
+            data-ticket-titulo="{{ chamado.titulo }}">
+        <i class="fas fa-comments"></i> Chat
+    </button>
 </form>
+
                 </div>
             {% empty %}
                 <div class="card">
@@ -279,67 +317,113 @@
         </div>
     </div>
 </div>
-<!-- Paginação para chamados ativos -->
-<div class="pagination">
-  <span class="step-links">
+<!-- Paginação para Chamados Ativos -->
+<div class="pagination text-center mt-6">
+  <div class="inline-flex items-center space-x-2 text-sm">
+    
     {% if chamados_ativos.has_previous %}
-      <a href="?page_ativos=1">&laquo; primeira</a>
-      <a href="?page_ativos={{ chamados_ativos.previous_page_number }}">anterior</a>
+      <a href="?page_ativos={{ chamados_ativos.previous_page_number }}" 
+         class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition">
+        ← Anterior
+      </a>
+    {% else %}
+      <span class="px-3 py-1 bg-gray-100 text-gray-400 rounded-md cursor-not-allowed">
+        ← Anterior
+      </span>
     {% endif %}
 
-    <span class="current">
-      Página {{ chamados_ativos.number }} de {{ chamados_ativos.paginator.num_pages }}.
+    <span class="px-4 py-1 font-medium text-gray-700">
+      Página <span class="font-semibold">{{ chamados_ativos.number }}</span> de {{ chamados_ativos.paginator.num_pages }}
     </span>
 
     {% if chamados_ativos.has_next %}
-      <a href="?page_ativos={{ chamados_ativos.next_page_number }}">próxima</a>
-      <a href="?page_ativos={{ chamados_ativos.paginator.num_pages }}">última &raquo;</a>
-    {% endif %}
-  </span>
-</div>
-        <!-- Chamados Concluídos -->
-        <h2 class="section-title">Chamados Concluídos</h2>
-        <div class="card-container">
-            {% for chamado in chamados_concluidos %}
-                <div class="card">
-                    <p><strong>Título:</strong> {{ chamado.titulo }}</p>
-                    <p><strong>Status:</strong> {{ chamado.status }}</p>
-                    <p><strong>Técnico:</strong>
-                        {% if chamado.tecnico %}
-                            {{ chamado.tecnico.username }}
-                        {% else %}
-                            Não atribuído
-                        {% endif %}
-                    </p>
-                    <p><strong>Data de fechamento:</strong> {{ chamado.data_fechamento|default:"-" }}</p>
-                </div>
-            {% empty %}
-                <div class="card">
-                    <p>Não há chamados concluídos.</p>
-                </div>
-            {% endfor %}
-        </div>
-<!-- Paginação para chamados concluídos -->
-<div class="pagination">
-  <span class="step-links">
-    {% if chamados_concluidos.has_previous %}
-      <a href="?page_concluidos=1">&laquo; primeira</a>
-      <a href="?page_concluidos={{ chamados_concluidos.previous_page_number }}">anterior</a>
+      <a href="?page_ativos={{ chamados_ativos.next_page_number }}" 
+         class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition">
+        Próxima →
+      </a>
+    {% else %}
+      <span class="px-3 py-1 bg-gray-100 text-gray-400 rounded-md cursor-not-allowed">
+        Próxima →
+      </span>
     {% endif %}
 
-    <span class="current">
-      Página {{ chamados_concluidos.number }} de {{ chamados_concluidos.paginator.num_pages }}.
+  </div>
+</div>
+
+
+<!-- Chamados Concluídos -->
+<h2 class="section-title text-xl font-semibold mt-10 mb-4 text-gray-800">Chamados Concluídos</h2>
+
+<div class="card-container grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+  {% for chamado in chamados_concluidos %}
+    <div class="card bg-white shadow-md rounded-xl p-4 border border-gray-100 hover:shadow-lg transition">
+      <p><strong>Título:</strong> {{ chamado.titulo }}</p>
+      <p><strong>Status:</strong> {{ chamado.status }}</p>
+      <p><strong>Técnico:</strong>
+        {% if chamado.tecnico %}
+          {{ chamado.tecnico.username }}
+        {% else %}
+          Não atribuído
+        {% endif %}
+      </p>
+      <p><strong>Data de fechamento:</strong> {{ chamado.data_fechamento|default:"-" }}</p>
+    </div>
+  {% empty %}
+    <div class="card bg-gray-50 text-gray-600 p-4 rounded-md text-center">
+      Não há chamados concluídos.
+    </div>
+  {% endfor %}
+</div>
+<!-- Modal do Chat Técnico -->
+<div id="modalChatTecnico" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Chat do Chamado: <span id="chat-titulo-tecnico"></span></h2>
+        <div id="chat-box-tecnico" style="height:300px; overflow-y:auto; border:1px solid #ccc; padding:10px; border-radius:8px; background:#f9f9f9;"></div>
+        <form id="form-chat-tecnico">
+            {% csrf_token %}
+            <textarea id="texto-mensagem-tecnico" placeholder="Digite sua mensagem..." required></textarea>
+            <button type="submit"><i class="fas fa-paper-plane"></i> Enviar</button>
+        </form>
+    </div>
+</div>
+
+
+<!-- Paginação para Chamados Concluídos -->
+<div class="pagination text-center mt-6 mb-8">
+  <div class="inline-flex items-center space-x-2 text-sm">
+    
+    {% if chamados_concluidos.has_previous %}
+      <a href="?page_concluidos={{ chamados_concluidos.previous_page_number }}" 
+         class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition">
+        ← Anterior
+      </a>
+    {% else %}
+      <span class="px-3 py-1 bg-gray-100 text-gray-400 rounded-md cursor-not-allowed">
+        ← Anterior
+      </span>
+    {% endif %}
+
+    <span class="px-4 py-1 font-medium text-gray-700">
+      Página <span class="font-semibold">{{ chamados_concluidos.number }}</span> de {{ chamados_concluidos.paginator.num_pages }}
     </span>
 
     {% if chamados_concluidos.has_next %}
-      <a href="?page_concluidos={{ chamados_concluidos.next_page_number }}">próxima</a>
-      <a href="?page_concluidos={{ chamados_concluidos.paginator.num_pages }}">última &raquo;</a>
+      <a href="?page_concluidos={{ chamados_concluidos.next_page_number }}" 
+         class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition">
+        Próxima →
+      </a>
+    {% else %}
+      <span class="px-3 py-1 bg-gray-100 text-gray-400 rounded-md cursor-not-allowed">
+        Próxima →
+      </span>
     {% endif %}
-  </span>
+
+  </div>
 </div>
-<body>
+
 <div id="preloader">
-    <div class="spinner"></div>
+  <div class="loader"></div>
 </div>
 
 
@@ -385,6 +469,74 @@
 
     return false; // Evita submissão do form imediatamente
 }
+// Modal chat técnico
+const modalChatTec = document.getElementById("modalChatTecnico");
+const spanChatTec = modalChatTec.querySelector(".close");
+const chatTituloTec = document.getElementById("chat-titulo-tecnico");
+let currentTicketIdTec = null;
+
+// Abrir modal com ticket específico
+document.querySelectorAll(".btn-open-chat-tecnico").forEach(btn => {
+    btn.onclick = () => {
+        currentTicketIdTec = btn.dataset.ticketId;
+        chatTituloTec.textContent = btn.dataset.ticketTitulo;
+        modalChatTec.style.display = "block";
+        carregarMensagensTec();
+    }
+});
+
+// Fechar modal
+spanChatTec.onclick = () => modalChatTec.style.display = "none";
+window.onclick = e => { if(e.target == modalChatTec) modalChatTec.style.display = "none"; };
+
+// Função para carregar mensagens via Ajax
+function carregarMensagensTec() {
+    if(!currentTicketIdTec) return;
+    fetch(`/chat/${currentTicketIdTec}/`)
+        .then(res => res.json())
+        .then(data => {
+            const chatBox = document.getElementById('chat-box-tecnico');
+            chatBox.innerHTML = '';
+            data.mensagens.forEach(m => {
+                const div = document.createElement('div');
+const usuarioAtual = "{{ request.user.username }}";  // será substituído pelo Django ao renderizar o template
+const isAutor = m.autor === usuarioAtual;                div.style.padding = '8px';
+                div.style.marginBottom = '5px';
+                div.style.borderRadius = '10px';
+                div.style.background = isAutor ? '#DCF8C6' : '#FFF';
+                div.innerHTML = `<strong>${m.autor}:</strong> ${m.texto}<br><span style="font-size:0.7em;color:gray;">${m.data_envio}</span>`;
+                chatBox.appendChild(div);
+            });
+            chatBox.scrollTop = chatBox.scrollHeight;
+        });
+}
+
+// Enviar mensagem via Ajax
+document.getElementById('form-chat-tecnico').addEventListener('submit', e => {
+    e.preventDefault();
+    const texto = document.getElementById('texto-mensagem-tecnico').value;
+    if(!currentTicketIdTec || !texto) return;
+
+    const formData = new FormData();
+    formData.append('texto', texto);
+
+    fetch(`/chat/${currentTicketIdTec}/`, {
+        method: 'POST',
+        headers: {'X-CSRFToken': '{{ csrf_token }}'},
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.sucesso) {
+            document.getElementById('texto-mensagem-tecnico').value = '';
+            carregarMensagensTec();
+        }
+    });
+});
+
+// Atualiza chat automaticamente a cada 2s
+setInterval(carregarMensagensTec, 2000);
+
     </script>
 </body>
 </html>

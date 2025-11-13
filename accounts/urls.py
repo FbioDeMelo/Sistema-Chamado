@@ -24,5 +24,6 @@ urlpatterns = [
 
     # --- Dashboard Admin ---
 path('graficos-tickets/', views.graficos_tickets, name='graficos_tickets'),
+    path('chat/<int:ticket_id>/', views.chat_ticket, name='chat_ticket'),
 
 ]

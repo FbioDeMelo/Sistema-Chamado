@@ -168,7 +168,7 @@ def chamados_admin(request):
         return redirect('index')
 
     todos_chamados_list = Ticket.objects.all()
-    paginator = Paginator(todos_chamados_list, 10)  # 10 chamados por página
+    paginator = Paginator(todos_chamados_list, 12)  # 10 chamados por página
     page_number = request.GET.get('page')
     todos_chamados = paginator.get_page(page_number)
 
@@ -351,3 +351,41 @@ def graficos_tickets(request):
     }
 
     return render(request, 'accounts/graficos_tickets.html', contexto)
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+from .models import Ticket, Mensagem
+from django.shortcuts import get_object_or_404, render
+
+@login_required
+def chat_ticket(request, ticket_id):
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+
+    # Apenas admin, colaborador dono ou técnico podem acessar
+    if not (request.user.role == 'tecnico' or request.user == ticket.colaborador or request.user.role == 'admin'):
+        return JsonResponse({'erro': 'Acesso negado'}, status=403)
+
+    # Bloquear colaborador se o ticket estiver concluído
+    if request.method == 'POST':
+        if ticket.status == 'concluido' and request.user.role == 'colaborador':
+            return JsonResponse({'erro': 'Não é possível enviar mensagens em chamado concluído.'}, status=403)
+
+        texto = request.POST.get('texto')
+        if texto:
+            Mensagem.objects.create(ticket=ticket, autor=request.user, texto=texto)
+            return JsonResponse({'sucesso': True})
+
+    # Para GET ou atualização
+    mensagens = ticket.mensagens.order_by('data_envio').values(
+        'autor__username', 'texto', 'data_envio'
+    )
+    mensagens_list = [
+        {
+            'autor': m['autor__username'],
+            'texto': m['texto'],
+            'data_envio': m['data_envio'].strftime('%d/%m %H:%M')
+        } for m in mensagens
+    ]
+    return JsonResponse({'mensagens': mensagens_list, 'status': ticket.status})
+
+

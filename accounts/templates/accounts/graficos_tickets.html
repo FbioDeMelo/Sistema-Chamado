@@ -247,21 +247,42 @@
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
+#chart-container {
+    position: relative;
+    width: 100%;
+    min-height: 300px;
+}
+
 
 @keyframes spin {
     to {
         transform: rotate(360deg);
     }
 }
-
+.logo-img {
+    width: 180px;
+    height: auto;
+    display: block;
+    margin: 20px auto;
+    content: url("https://institutolibano.com.br/_next/image?url=%2Froot%2Flogo-website-branca.webp&w=384&q=75");
+}
+/* Quando estiver em modo mobile */
+@media (max-width: 768px) {
+    .logo-img {
+        content: url("https://artigos.libanoeducacional.com.br/cropped-logo-270x270.webp"); /* <- Coloque aqui a imagem para mobile */
+        width: 40px;
+    }
+}
     </style>
 </head>
 <body>
     <!-- Sidebar -->
-    <div class="sidebar">
-        <div class="logo">
-            <h2><i class="fas fa-headset"></i> <span>Chamados TI</span></h2>
-        </div>
+<div class="sidebar">
+    <div class="logo">
+        <img class="logo-img" 
+             src="https://institutolibano.com.br/_next/image?url=%2Froot%2Flogo-website-branca.webp&w=384&q=75" 
+             alt="Instituto Líbano">
+    </div>
         <ul class="nav-links">
             <li><a href="{% url 'index' %}"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
 
@@ -315,53 +336,55 @@
     <div id="chart-loader" style="display: flex; align-items: center; justify-content: center; height: 100%;">
         <div class="spinner"></div>
     </div>
-    <canvas id="graficoTickets" style="display: none;"></canvas>
+<canvas id="graficoTickets" style="visibility: hidden; opacity: 0; transition: opacity 0.5s;"></canvas>
 </div>
         </div>
 
         <script>
- window.addEventListener('load', function() {
-        const ctx = document.getElementById('graficoTickets').getContext('2d');
+window.addEventListener('load', function() {
+    const ctx = document.getElementById('graficoTickets').getContext('2d');
 
-        // Inicializa o gráfico
-        const grafico = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: {{ datas|safe }},
-                datasets: [
-                    {
-                        label: 'Abertos',
-                        data: {{ abertos|safe }},
-                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
-                        borderColor: 'rgba(255, 99, 132, 1)',
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'Concluídos',
-                        data: {{ concluidos|safe }},
-                        backgroundColor: 'rgba(75, 192, 75, 0.5)',
-                        borderColor: 'rgba(75, 192, 75, 1)',
-                        borderWidth: 1
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { position: 'bottom' },
-                    title: { display: true, text: 'Tickets criados e concluídos por dia' }
+    const grafico = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {{ datas|safe }},
+            datasets: [
+                {
+                    label: 'Abertos',
+                    data: {{ abertos|safe }},
+                    backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
                 },
-                scales: {
-                    x: { title: { display: true, text: 'Data' } },
-                    y: { beginAtZero: true, title: { display: true, text: 'Quantidade' } }
+                {
+                    label: 'Concluídos',
+                    data: {{ concluidos|safe }},
+                    backgroundColor: 'rgba(75, 192, 75, 0.5)',
+                    borderColor: 'rgba(75, 192, 75, 1)',
+                    borderWidth: 1
                 }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom' },
+                title: { display: true, text: 'Tickets criados e concluídos por dia' }
+            },
+            scales: {
+                x: { title: { display: true, text: 'Data' } },
+                y: { beginAtZero: true, title: { display: true, text: 'Quantidade' } }
             }
-        });
-
-        // Após o gráfico ser renderizado, esconde o loader e mostra o gráfico
-        document.getElementById('chart-loader').style.display = 'none';
-        document.getElementById('graficoTickets').style.display = 'block';
+        }
     });
+
+    document.getElementById('chart-loader').style.display = 'none';
+    const canvas = document.getElementById('graficoTickets');
+    canvas.style.visibility = 'visible';
+    canvas.style.opacity = '1';
+});
+
         </script>
     </div>
 </body>

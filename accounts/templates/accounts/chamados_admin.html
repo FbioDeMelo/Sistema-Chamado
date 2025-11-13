@@ -70,37 +70,52 @@
 }
 /* Preloader */
 #preloader {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: #f1f5f9;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-    transition: opacity 0.5s ease, visibility 0.5s ease;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.2); /* leve overlay escuro */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
 }
 
-.spinner {
-    width: 60px;
-    height: 60px;
-    border: 6px solid var(--primary);
-    border-top-color: transparent;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
+.loader {
+  width: 60px;
+  aspect-ratio: 2;
+  --_g: no-repeat radial-gradient(circle closest-side, var(--primary) 90%, #0000);
+  background:
+    var(--_g) 0%   50%,
+    var(--_g) 50%  50%,
+    var(--_g) 100% 50%;
+  background-size: calc(100%/3) 50%;
+  animation: l3 1s infinite linear;
 }
 
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
+@keyframes l3 {
+  20% { background-position: 0%   0%, 50%  50%, 100% 50%; }
+  40% { background-position: 0% 100%, 50%   0%, 100% 50%; }
+  60% { background-position: 0%  50%, 50% 100%, 100%  0%; }
+  80% { background-position: 0%  50%, 50%  50%, 100% 100%; }
 }
 
 #preloader.fade-out {
-    opacity: 0;
-    visibility: hidden;
+  opacity: 0;
+  visibility: hidden;
+}
+.logo-img {
+    width: 180px;
+    height: auto;
+    display: block;
+    margin: 20px auto;
+    content: url("https://institutolibano.com.br/_next/image?url=%2Froot%2Flogo-website-branca.webp&w=384&q=75");
+}
+/* Quando estiver em modo mobile */
+@media (max-width: 768px) {
+    .logo-img {
+        content: url("https://artigos.libanoeducacional.com.br/cropped-logo-270x270.webp"); /* <- Coloque aqui a imagem para mobile */
+        width: 40px;
+    }
 }
 .pagination {
     text-align: center;
@@ -127,13 +142,29 @@
     background-color: #6c757d;
     cursor: default;
 }
+.logo-img {
+    width: 180px;
+    height: auto;
+    display: block;
+    margin: 20px auto;
+    content: url("https://institutolibano.com.br/_next/image?url=%2Froot%2Flogo-website-branca.webp&w=384&q=75");
+}
+/* Quando estiver em modo mobile */
+@media (max-width: 768px) {
+    .logo-img {
+        content: url("https://artigos.libanoeducacional.com.br/cropped-logo-270x270.webp"); /* <- Coloque aqui a imagem para mobile */
+        width: 40px;
+    }
+}
     </style>
 </head>
 <body>
-    <div class="sidebar">
-        <div class="logo">
-            <h2><i class="fas fa-headset"></i> <span>Chamados TI</span></h2>
-        </div>
+<div class="sidebar">
+    <div class="logo">
+        <img class="logo-img" 
+             src="https://institutolibano.com.br/_next/image?url=%2Froot%2Flogo-website-branca.webp&w=384&q=75" 
+             alt="Instituto Líbano">
+    </div>
         <ul class="nav-links">
             <li><a href="{% url 'index' %}"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
 
@@ -186,27 +217,42 @@
     {% endfor %}
     
 </div>
-<a href="{% url 'index' %}" class="btn" style="margin-top: 20px;"><i class="fas fa-arrow-left"></i> Voltar</a>
-<div class="pagination">
-  <span class="step-links">
+<div class="pagination text-center mt-4">
+  <div class="inline-flex items-center space-x-2 text-sm">
+    
     {% if todos_chamados.has_previous %}
-      <a href="?page=1">&laquo; primeira</a>
-      <a href="?page={{ todos_chamados.previous_page_number }}">anterior</a>
+      <a href="?page={{ todos_chamados.previous_page_number }}" 
+         class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition">
+        ← Anterior
+      </a>
+    {% else %}
+      <span class="px-3 py-1 bg-gray-100 text-gray-400 rounded-md cursor-not-allowed">
+        ← Anterior
+      </span>
     {% endif %}
 
-    <span class="current">
-      Página {{ todos_chamados.number }} de {{ todos_chamados.paginator.num_pages }}.
+    <span class="px-4 py-1 font-medium text-gray-700">
+      Página <span class="font-semibold">{{ todos_chamados.number }}</span> de {{ todos_chamados.paginator.num_pages }}
     </span>
 
     {% if todos_chamados.has_next %}
-      <a href="?page={{ todos_chamados.next_page_number }}">próxima</a>
-      <a href="?page={{ todos_chamados.paginator.num_pages }}">última &raquo;</a>
+      <a href="?page={{ todos_chamados.next_page_number }}" 
+         class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition">
+        Próxima →
+      </a>
+    {% else %}
+      <span class="px-3 py-1 bg-gray-100 text-gray-400 rounded-md cursor-not-allowed">
+        Próxima →
+      </span>
     {% endif %}
-  </span>
+    
+  </div>
 </div>
+<a href="{% url 'index' %}" class="btn" style="margin-top: 20px;"><i class="fas fa-arrow-left"></i> Voltar</a>
+
 <div id="preloader">
-    <div class="spinner"></div>
-</div>
+  <div class="loader"></div>
+</div>  
 
         <div class="footer">
             <p>Sistema de Chamados TI &copy; {% now "Y" %} - Todos os direitos reservados</p>

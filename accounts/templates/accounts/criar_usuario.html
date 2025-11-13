@@ -322,48 +322,79 @@
             }
         }
         /* Preloader */
+/* Preloader */
 #preloader {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: #f1f5f9;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-    transition: opacity 0.5s ease, visibility 0.5s ease;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.2); /* leve overlay escuro */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
 }
 
-.spinner {
-    width: 60px;
-    height: 60px;
-    border: 6px solid var(--primary);
-    border-top-color: transparent;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
+.loader {
+  width: 60px;
+  aspect-ratio: 2;
+  --_g: no-repeat radial-gradient(circle closest-side, var(--primary) 90%, #0000);
+  background:
+    var(--_g) 0%   50%,
+    var(--_g) 50%  50%,
+    var(--_g) 100% 50%;
+  background-size: calc(100%/3) 50%;
+  animation: l3 1s infinite linear;
 }
 
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
+@keyframes l3 {
+  20% { background-position: 0%   0%, 50%  50%, 100% 50%; }
+  40% { background-position: 0% 100%, 50%   0%, 100% 50%; }
+  60% { background-position: 0%  50%, 50% 100%, 100%  0%; }
+  80% { background-position: 0%  50%, 50%  50%, 100% 100%; }
 }
 
 #preloader.fade-out {
-    opacity: 0;
-    visibility: hidden;
+  opacity: 0;
+  visibility: hidden;
 }
-
+.logo-img {
+    width: 180px;
+    height: auto;
+    display: block;
+    margin: 20px auto;
+    content: url("https://institutolibano.com.br/_next/image?url=%2Froot%2Flogo-website-branca.webp&w=384&q=75");
+}
+/* Quando estiver em modo mobile */
+@media (max-width: 768px) {
+    .logo-img {
+        content: url("https://artigos.libanoeducacional.com.br/cropped-logo-270x270.webp"); /* <- Coloque aqui a imagem para mobile */
+        width: 40px;
+    }
+}
+.logo-img {
+    width: 180px;
+    height: auto;
+    display: block;
+    margin: 20px auto;
+    content: url("https://institutolibano.com.br/_next/image?url=%2Froot%2Flogo-website-branca.webp&w=384&q=75");
+}
+/* Quando estiver em modo mobile */
+@media (max-width: 768px) {
+    .logo-img {
+        content: url("https://artigos.libanoeducacional.com.br/cropped-logo-270x270.webp"); /* <- Coloque aqui a imagem para mobile */
+        width: 40px;
+    }
+}
     </style>
 </head>
 <body>
     <!-- Sidebar -->
-    <div class="sidebar">
-        <div class="logo">
-            <h2><i class="fas fa-headset"></i> <span>Chamados TI</span></h2>
-        </div>
+<div class="sidebar">
+    <div class="logo">
+        <img class="logo-img" 
+             src="https://institutolibano.com.br/_next/image?url=%2Froot%2Flogo-website-branca.webp&w=384&q=75" 
+             alt="Instituto Líbano">
+    </div>
         <ul class="nav-links">
             <li><a href="{% url 'index' %}"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
 
@@ -498,17 +529,15 @@
                     <button type="submit" class="btn btn-success">
                         <i class="fas fa-user-plus"></i> Criar Usuário
                     </button>
-                    <a href="{% url 'chamados_admin' %}" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left"></i> Voltar
-                    </a>
+
                 </div>
             </form>
         </div>
     </div>
 <body>
 <div id="preloader">
-    <div class="spinner"></div>
-</div>
+  <div class="loader"></div>
+</div>  
 
     <!-- JavaScript para mostrar/esconder o setor -->
     <script>

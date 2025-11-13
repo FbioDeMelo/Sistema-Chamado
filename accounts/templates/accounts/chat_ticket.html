@@ -1,0 +1,80 @@
+<h2>Chat do Chamado: {{ ticket.titulo }}</h2>
+
+<div id="chat-box" style="
+    border:1px solid #ccc; 
+    padding:10px; 
+    height:400px; 
+    overflow-y:auto; 
+    background:#f9f9f9;
+    border-radius:8px;
+">
+    <!-- mensagens carregadas via Ajax -->
+</div>
+
+<form id="form-chat" style="margin-top:10px; display:flex;">
+    <textarea id="texto-mensagem" placeholder="Digite sua mensagem..." required 
+        style="flex:1; padding:10px; border-radius:6px; border:1px solid #ccc;"></textarea>
+    <button type="submit" style="
+        margin-left:5px; 
+        padding:10px 20px; 
+        border:none; 
+        background:#4CAF50; 
+        color:white; 
+        border-radius:6px; 
+        cursor:pointer;
+    ">Enviar</button>
+</form>
+
+<script>
+const ticketId = {{ ticket.id }};
+const chatBox = document.getElementById('chat-box');
+const form = document.getElementById('form-chat');
+const textarea = document.getElementById('texto-mensagem');
+
+function carregarMensagens() {
+    fetch(`/chat/${ticketId}/`)
+        .then(res => res.json())
+        .then(data => {
+            chatBox.innerHTML = '';
+            data.mensagens.forEach(m => {
+                const p = document.createElement('div');
+                const isAutor = m.autor === '{{ request.user.username }}';
+                p.style.marginBottom = '8px';
+                p.style.padding = '8px 12px';
+                p.style.borderRadius = '15px';
+                p.style.maxWidth = '70%';
+                p.style.background = isAutor ? '#DCF8C6' : '#FFF';
+                p.style.alignSelf = isAutor ? 'flex-end' : 'flex-start';
+                p.style.clear = 'both';
+                p.style.display = 'inline-block';
+                p.innerHTML = `<strong>${m.autor}:</strong> ${m.texto}<br><span style="font-size:0.7em;color:gray;">${m.data_envio}</span>`;
+                chatBox.appendChild(p);
+            });
+            chatBox.scrollTop = chatBox.scrollHeight;
+        });
+}
+
+// Atualiza mensagens a cada 2 segundos
+setInterval(carregarMensagens, 2000);
+carregarMensagens();
+
+// Envio via Ajax
+form.addEventListener('submit', e => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append('texto', textarea.value);
+
+    fetch(`/chat/${ticketId}/`, {
+        method: 'POST',
+        headers: {'X-CSRFToken': '{{ csrf_token }}'},
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.sucesso) {
+            textarea.value = '';
+            carregarMensagens();
+        }
+    });
+});
+</script>

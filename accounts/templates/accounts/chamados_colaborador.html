@@ -123,37 +123,52 @@
 }
 /* Preloader */
 #preloader {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: #f1f5f9;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-    transition: opacity 0.5s ease, visibility 0.5s ease;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.2); /* leve overlay escuro */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
 }
 
-.spinner {
-    width: 60px;
-    height: 60px;
-    border: 6px solid var(--primary);
-    border-top-color: transparent;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
+.loader {
+  width: 60px;
+  aspect-ratio: 2;
+  --_g: no-repeat radial-gradient(circle closest-side, var(--primary) 90%, #0000);
+  background:
+    var(--_g) 0%   50%,
+    var(--_g) 50%  50%,
+    var(--_g) 100% 50%;
+  background-size: calc(100%/3) 50%;
+  animation: l3 1s infinite linear;
 }
 
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
+@keyframes l3 {
+  20% { background-position: 0%   0%, 50%  50%, 100% 50%; }
+  40% { background-position: 0% 100%, 50%   0%, 100% 50%; }
+  60% { background-position: 0%  50%, 50% 100%, 100%  0%; }
+  80% { background-position: 0%  50%, 50%  50%, 100% 100%; }
 }
 
 #preloader.fade-out {
-    opacity: 0;
-    visibility: hidden;
+  opacity: 0;
+  visibility: hidden;
+}
+.logo-img {
+    width: 180px;
+    height: auto;
+    display: block;
+    margin: 20px auto;
+    content: url("https://institutolibano.com.br/_next/image?url=%2Froot%2Flogo-website-branca.webp&w=384&q=75");
+}
+/* Quando estiver em modo mobile */
+@media (max-width: 768px) {
+    .logo-img {
+        content: url("https://artigos.libanoeducacional.com.br/cropped-logo-270x270.webp"); /* <- Coloque aqui a imagem para mobile */
+        width: 40px;
+    }
 }
 .pagination {
     text-align: center;
@@ -215,15 +230,30 @@
     font-weight: bold;
     color: #333;
 }
+.logo-img {
+    width: 180px;
+    height: auto;
+    display: block;
+    margin: 20px auto;
+    content: url("https://institutolibano.com.br/_next/image?url=%2Froot%2Flogo-website-branca.webp&w=384&q=75");
+}
+@media (max-width: 768px) {
+    .logo-img {
+        content: url("https://artigos.libanoeducacional.com.br/cropped-logo-270x270.webp"); /* <- Coloque aqui a imagem para mobile */
+        width: 40px;
+    }
+}
     </style>
 </head>
 <body>
 
     <!-- Sidebar -->
-    <div class="sidebar">
-        <div class="logo">
-            <h2><i class="fas fa-headset"></i> <span>Chamados TI</span></h2>
-        </div>
+<div class="sidebar">
+    <div class="logo">
+        <img class="logo-img" 
+             src="https://institutolibano.com.br/_next/image?url=%2Froot%2Flogo-website-branca.webp&w=384&q=75" 
+             alt="Instituto Líbano">
+    </div>
         <ul class="nav-links">
             <li><a href="{% url 'index' %}"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
 
@@ -255,32 +285,63 @@
         <h2 class="section-title">Seus Chamados</h2>
         <div class="card-container">
             {% for chamado in chamados %}
-                <div class="card">
-                    <p><strong>Título:</strong> {{ chamado.titulo }}</p>
-                    <p><strong>Status:</strong> {{ chamado.status }}</p>
-                </div>
+              <div class="card">
+    <p><strong>Título:</strong> {{ chamado.titulo }}</p>
+    <p><strong>Status:</strong> {{ chamado.status }}</p>
+    <button class="btn-open-chat" data-ticket-id="{{ chamado.id }}" data-ticket-titulo="{{ chamado.titulo }}">
+        <i class="fas fa-comments"></i> Chat
+    </button>
+</div>
+
             {% empty %}
                 <div class="card">
                     <p>Você ainda não abriu chamados.</p>
                 </div>
             {% endfor %}
         </div>
-<div class="pagination">
-  <span class="step-links">
-    {% if chamados.has_previous %}
-      <a href="?page=1">&laquo; primeira</a>
-      <a href="?page={{ chamados.previous_page_number }}">anterior</a>
+<div class="pagination text-center mt-4">
+  <div class="inline-flex items-center space-x-2 text-sm">
+    
+    {% if todos_chamados.has_previous %}
+      <a href="?page={{ todos_chamados.previous_page_number }}" 
+         class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition">
+        ← Anterior
+      </a>
+    {% else %}
+      <span class="px-3 py-1 bg-gray-100 text-gray-400 rounded-md cursor-not-allowed">
+        ← Anterior
+      </span>
     {% endif %}
 
-    <span class="current">
-      Página {{ chamados.number }} de {{ chamados.paginator.num_pages }}.
+    <span class="px-4 py-1 font-medium text-gray-700">
+      Página <span class="font-semibold">{{ todos_chamados.number }}</span> de {{ todos_chamados.paginator.num_pages }}
     </span>
 
-    {% if chamados.has_next %}
-      <a href="?page={{ chamados.next_page_number }}">próxima</a>
-      <a href="?page={{ chamados.paginator.num_pages }}">última &raquo;</a>
+    {% if todos_chamados.has_next %}
+      <a href="?page={{ todos_chamados.next_page_number }}" 
+         class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition">
+        Próxima →
+      </a>
+    {% else %}
+      <span class="px-3 py-1 bg-gray-100 text-gray-400 rounded-md cursor-not-allowed">
+        Próxima →
+      </span>
     {% endif %}
-  </span>
+    
+  </div>
+</div>
+<!-- Modal do Chat -->
+<div id="modalChat" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Chat do Chamado: <span id="chat-titulo"></span></h2>
+        <div id="chat-box" style="height:300px; overflow-y:auto; border:1px solid #ccc; padding:10px; border-radius:8px; background:#f9f9f9;"></div>
+        <form id="form-chat">
+            {% csrf_token %}
+            <textarea id="texto-mensagem" placeholder="Digite sua mensagem..." required></textarea>
+            <button type="submit"><i class="fas fa-paper-plane"></i> Enviar</button>
+        </form>
+    </div>
 </div>
 
 <div id="modalChamado" class="modal">
@@ -312,7 +373,7 @@
         </div>
     </div>
 <div id="preloader">
-    <div class="spinner"></div>
+  <div class="loader"></div>
 </div>  
     <script>
         // Abrir modal
@@ -350,6 +411,102 @@ window.onclick = function(event) {
 
     });
 });
+const modalChat = document.getElementById("modalChat");
+const spanChat = modalChat.querySelector(".close");
+const chatTitulo = document.getElementById("chat-titulo");
+let currentTicketId = null;
+
+// Função para obter o CSRF token correto
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+const csrftoken = getCookie('csrftoken');
+
+// Abrir modal com ticket específico
+document.querySelectorAll(".btn-open-chat").forEach(btn => {
+    btn.onclick = () => {
+        currentTicketId = btn.dataset.ticketId;
+        chatTitulo.textContent = btn.dataset.ticketTitulo;
+        modalChat.style.display = "block";
+        carregarMensagens();
+    }
+});
+
+// Fechar modal
+spanChat.onclick = () => modalChat.style.display = "none";
+window.onclick = e => { if (e.target == modalChat) modalChat.style.display = "none"; };
+
+function carregarMensagens() {
+    if(!currentTicketId) return;
+    fetch(`/chat/${currentTicketId}/`)
+        .then(res => res.json())
+        .then(data => {
+            const chatBox = document.getElementById('chat-box');
+            const textarea = document.getElementById('texto-mensagem');
+            chatBox.innerHTML = '';
+
+            // Bloquear envio se ticket concluído e usuário for colaborador
+            if(data.status === 'concluido' && '{{ request.user.role }}' === 'colaborador') {
+                textarea.disabled = true;
+                textarea.placeholder = 'Chamado concluído. Não é possível enviar mensagens.';
+            } else {
+                textarea.disabled = false;
+                textarea.placeholder = 'Digite sua mensagem...';
+            }
+
+            data.mensagens.forEach(m => {
+                const p = document.createElement('div');
+                const isAutor = m.autor === '{{ request.user.username }}';
+                p.style.padding = '8px';
+                p.style.marginBottom = '5px';
+                p.style.borderRadius = '10px';
+                p.style.background = isAutor ? '#DCF8C6' : '#FFF';
+                p.innerHTML = `<strong>${m.autor}:</strong> ${m.texto}<br><span style="font-size:0.7em;color:gray;">${m.data_envio}</span>`;
+                chatBox.appendChild(p);
+            });
+            chatBox.scrollTop = chatBox.scrollHeight;
+        });
+}
+
+// Enviar mensagem
+document.getElementById('form-chat').addEventListener('submit', e => {
+    e.preventDefault();
+    const texto = document.getElementById('texto-mensagem').value;
+    if (!currentTicketId || !texto) return;
+
+    const formData = new FormData();
+    formData.append('texto', texto);
+
+    fetch(`/chat/${currentTicketId}/`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': csrftoken },
+        body: formData
+    })
+        .then(res => res.json())
+        .then(data => {
+            if (data.sucesso) {
+                document.getElementById('texto-mensagem').value = '';
+                carregarMensagens();
+            } else {
+                console.warn("Erro ao enviar mensagem:", data);
+            }
+        })
+        .catch(err => console.error("Erro no envio:", err));
+});
+
+// Atualiza chat automaticamente a cada 2s
+setInterval(carregarMensagens, 2000);
     </script>
 </body>
 </html>
