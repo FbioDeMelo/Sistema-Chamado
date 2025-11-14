@@ -47,6 +47,13 @@ from django.core.paginator import Paginator
 # --- Tela principal de chamados ---
 from django.core.mail import send_mail
 from django.conf import settings
+from .utils import notify_new_ticket, notify_ticket_closed
+from django.core.paginator import Paginator
+from django.contrib import messages
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.utils import timezone
+from .models import Ticket
 
 @login_required
 def chamados_colaborador(request):
@@ -54,7 +61,6 @@ def chamados_colaborador(request):
         return redirect('index')
 
     chamados_list = Ticket.objects.filter(colaborador=request.user)
-
     paginator = Paginator(chamados_list, 5)  # 5 chamados por página
     page_number = request.GET.get('page')
     chamados = paginator.get_page(page_number)
@@ -86,9 +92,6 @@ def chamados_colaborador(request):
                 f"Em breve, um técnico entrará em contato.\n\n"
                 f"Atenciosamente,\nEquipe de Suporte"
             )
-            print(">>> Enviando e-mail para:", request.user.email)
-
-            # Envia e-mail ao colaborador
             send_mail(
                 assunto,
                 mensagem,
@@ -97,15 +100,15 @@ def chamados_colaborador(request):
                 fail_silently=False,
             )
 
-            messages.success(request, "Chamado criado com sucesso! Um e-mail de confirmação foi enviado.")
+            # --- Notificação em tempo real (sino) ---
+            notify_new_ticket(novo_ticket)
+
+            messages.success(request, "Chamado criado com sucesso! E-mail e notificação enviados.")
             return redirect('chamados_colaborador')
 
     return render(request, 'accounts/chamados_colaborador.html', {'chamados': chamados})
 
 # --- Tela de chamados para técnico ---
-from django.core.mail import send_mail
-from django.conf import settings
-
 @login_required
 def chamados_tecnico(request):
     if request.user.role != 'tecnico':
@@ -125,7 +128,7 @@ def chamados_tecnico(request):
 
     if request.method == 'POST':
         ticket_id = request.POST.get('ticket_id')
-        ticket = Ticket.objects.get(id=ticket_id)
+        ticket = get_object_or_404(Ticket, id=ticket_id)
         ticket.status = 'concluido'
         ticket.data_fechamento = timezone.now()
         ticket.tecnico = request.user
@@ -143,24 +146,24 @@ def chamados_tecnico(request):
             f"Agradecemos por utilizar nosso suporte.\n"
             f"Atenciosamente,\nEquipe de Suporte"
         )
-
         send_mail(
             assunto,
             mensagem,
             settings.DEFAULT_FROM_EMAIL,
-            [ticket.colaborador.email],  # envia para o dono do chamado
+            [ticket.colaborador.email],
             fail_silently=False,
         )
 
-        messages.success(request, "Chamado concluído! E-mail enviado ao colaborador.")
+        # --- Notificação em tempo real para o colaborador e outros técnicos ---
+        notify_ticket_closed(ticket, request.user)
+
+        messages.success(request, "Chamado concluído! E-mail e notificação enviados.")
         return redirect('chamados_tecnico')
 
     return render(request, 'accounts/chamados_tecnico.html', {
         'chamados_ativos': chamados_ativos,
         'chamados_concluidos': chamados_concluidos
     })
-
-
 # --- Tela para admin (visualizar tudo) ---
 @login_required
 def chamados_admin(request):
@@ -387,5 +390,51 @@ def chat_ticket(request, ticket_id):
         } for m in mensagens
     ]
     return JsonResponse({'mensagens': mensagens_list, 'status': ticket.status})
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from .models import Notificacao
+
+@login_required
+def verificar_notificacoes(request):
+    """
+    Retorna { unread_count: N }
+    """
+    unread = Notificacao.objects.filter(recipient=request.user, is_read=False).count()
+    return JsonResponse({'unread_count': unread})
+
+@login_required
+def listar_notificacoes(request):
+    """
+    Retorna JSON com as notificações do usuário (últimas 50).
+    """
+    notifs = Notificacao.objects.filter(recipient=request.user).order_by('-created_at')[:50]
+    data = []
+    for n in notifs:
+        data.append({
+            'id': n.id,
+            'titulo': n.titulo,
+            'mensagem': n.mensagem,
+            'target_url': n.target_url,
+            'is_read': n.is_read,
+            'created_at': n.created_at.strftime('%d/%m %H:%M'),
+        })
+    return JsonResponse({'notificacoes': data})
+
+@login_required
+def marcar_como_lida(request, notif_id):
+    """
+    Marca notificação como lida e retorna redirect_url em JSON.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'erro': 'Método inválido'}, status=400)
+
+    try:
+        n = Notificacao.objects.get(id=notif_id, recipient=request.user)
+    except Notificacao.DoesNotExist:
+        return JsonResponse({'erro': 'Notificação não encontrada'}, status=404)
+
+    n.is_read = True
+    n.save()
+    return JsonResponse({'sucesso': True, 'target_url': n.target_url})
 
 

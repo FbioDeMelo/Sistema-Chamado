@@ -87,3 +87,24 @@ class Mensagem(models.Model):
 
     def __str__(self):
         return f"{self.autor.username} - {self.ticket.titulo} - {self.data_envio.strftime('%d/%m %H:%M')}"
+    
+    from django.db import models
+from django.conf import settings
+from django.utils import timezone
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+class Notificacao(models.Model):
+    recipient = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='notificacoes')
+    titulo = models.CharField(max_length=200)
+    mensagem = models.TextField(blank=True)
+    target_url = models.CharField(max_length=300, blank=True)  # ex: /chamados/1/
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.titulo} -> {self.recipient}"

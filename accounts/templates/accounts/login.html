@@ -56,7 +56,7 @@
 
         .login-illustration {
             flex: 1.2;
-            background: linear-gradient(#2563eb);
+            background: linear-gradient(#000000);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -137,7 +137,7 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            background: var(--light);
+            background: black;
         }
 
         .logo {
@@ -230,30 +230,31 @@
         .remember {
             display: flex;
             align-items: center;
+            color:white;
         }
 
         .remember input {
             width: auto;
             margin-right: 8px;
-            accent-color: var(--primary);
+            accent-color: #ea005f;
         }
 
         .forgot-password {
-            color: var(--primary);
+            color: #ea005f;
             text-decoration: none;
             transition: color 0.3s ease;
             font-weight: 500;
         }
 
         .forgot-password:hover {
-            color: var(--primary-dark);
+            color: #ea005f;
             text-decoration: underline;
         }
 
         button {
             width: 100%;
             padding: 16px;
-            background: linear-gradient(to right, var(--primary), var(--primary-dark));
+            background: #ea005f;
             color: white;
             border: none;
             border-radius: 10px;
@@ -261,7 +262,6 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.4);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -270,7 +270,7 @@
 
         button:hover {
             transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(67, 97, 238, 0.5);
+            box-shadow: 0 8px 20px #ea005f;
         }
 
         button:active {
@@ -523,9 +523,9 @@
         </div>
         <div class="login-container">
             <div class="logo">
-                <i class="fas fa-headset logo-icon"></i>
-                <div class="logo-text">SuportePro</div>
-            </div>
+        <img class="logo-img" 
+             src="https://institutolibano.com.br/_next/image?url=%2Froot%2Flogo-website-branca.webp&w=384&q=75" 
+             alt="Instituto Líbano">            </div>
             
             <h3>Bem-vindo de volta</h3>
             <p class="subtitle">Faça login para acessar sua conta</p>

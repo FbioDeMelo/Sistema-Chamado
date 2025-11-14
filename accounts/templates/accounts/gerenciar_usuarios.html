@@ -443,6 +443,67 @@
         width: 40px;
     }
 }
+.notif-container {
+    position: relative;
+    margin-right: 25px;
+    cursor: pointer;
+}
+
+#notif-icon {
+    font-size: 22px;
+    color: #333;
+    position: relative;
+    cursor: pointer; /* Adicione esta linha */
+}
+
+/* Badge (bolinha vermelha) */
+.notif-badge {
+    position: absolute;
+    top: -8px;
+    right: -10px;
+    background: red;
+    color: white;
+    padding: 2px 6px;
+    font-size: 12px;
+    border-radius: 50%;
+    font-weight: bold;
+}
+
+/* Dropdown */
+.notif-dropdown {
+    position: absolute;
+    right: -10px;
+    top: 35px;
+    width: 280px;
+    max-height: 350px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    overflow-y: auto;
+    z-index: 9999; /* Aumente de 999 para 9999 */
+}
+
+.notif-dropdown h4 {
+    padding: 10px;
+    margin: 0;
+    background: #f3f3f3;
+    font-size: 15px;
+}
+
+.notif-item {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+}
+
+.notif-item:hover {
+    background: #f0f0f0;
+}
+
+.notif-item.unread {
+    background: #e8f0ff;
+    font-weight: bold;
+}
     </style>
 </head>
 <body>
@@ -480,6 +541,20 @@
                     <p>{{ request.user.get_role_display }}</p>
                 </div>
             </div>
+            <div class="notif-container">
+            <div id="notif-icon">
+                <i class="fas fa-bell"></i>
+                <span id="notif-badge" class="notif-badge" style="display:none;">0</span>
+            </div>
+
+            <!-- Dropdown -->
+            <div id="notif-dropdown" class="notif-dropdown" style="display:none;">
+                <h4>Notificações</h4>
+                <div id="notif-list">
+                    <p style="text-align:center; color:#777;">Carregando...</p>
+                </div>
+            </div>
+        </div>
             <a href="{% url 'logout' %}" class="btn"><i class="fas fa-sign-out-alt"></i> Sair</a>
         </div>
 
@@ -603,7 +678,126 @@
         preloader.classList.add('fade-out');
         setTimeout(() => preloader.style.display = 'none', 500); // total transition time
     });
+document.addEventListener("DOMContentLoaded", function () {
+    const notifIcon = document.getElementById("notif-icon");
+    const notifBadge = document.getElementById("notif-badge");
+    const notifDropdown = document.getElementById("notif-dropdown");
+    const notifList = document.getElementById("notif-list");
 
+    if (!notifIcon) return; // Se não houver sino, não faz nada
+
+    const pollingInterval = 5000; // 5s
+
+    // CSRF
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                cookie = cookie.trim();
+                if (cookie.startsWith(name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    function escapeHtml(unsafe) {
+        if (!unsafe) return '';
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    // Atualiza badge
+    function atualizarBadge() {
+        fetch("{% url 'verificar_notificacoes' %}")
+        .then(res => res.json())
+        .then(data => {
+            const count = data.unread_count || 0;
+            if (count > 0) {
+                notifBadge.style.display = 'inline-block';
+                notifBadge.textContent = count;
+            } else {
+                notifBadge.style.display = 'none';
+            }
+        })
+        .catch(err => console.error("Erro badge:", err));
+    }
+
+    // Carrega notificações
+    function carregarNotificacoes() {
+        notifList.innerHTML = '<p style="text-align:center;color:#777">Carregando...</p>';
+        fetch("{% url 'listar_notificacoes' %}")
+        .then(res => res.json())
+        .then(data => {
+            notifList.innerHTML = '';
+            const lista = data.notificacoes || [];
+            if (lista.length === 0) {
+                notifList.innerHTML = '<p style="text-align:center;color:#777;padding:10px">Nenhuma notificação.</p>';
+                return;
+            }
+
+            lista.forEach(n => {
+                const div = document.createElement('div');
+                div.className = 'notif-item' + (n.is_read ? '' : ' unread');
+                div.innerHTML = `<div style="font-size:0.95rem">${escapeHtml(n.titulo)}</div>
+                                 <div style="font-size:0.82rem;color:#666;margin-top:6px">${escapeHtml(n.mensagem)}</div>
+                                 <div style="font-size:0.75rem;color:#999;margin-top:6px">${n.created_at}</div>`;
+                div.style.padding = '10px';
+                div.style.cursor = 'pointer';
+
+              div.onclick = () => {
+    fetch(`{% url 'marcar_como_lida' 0 %}`.replace('/0/', `/${n.id}/`), {
+        method: 'POST',
+        headers: {'X-CSRFToken': csrftoken}
+    })
+    .then(res => res.json())
+    .then(r => {
+        if (r.sucesso) {
+            // Atualiza a badge e o estilo do item
+            atualizarBadge();
+            div.classList.remove('unread');
+        } else {
+            console.warn('Não foi possível marcar como lida', r);
+        }
+    })
+    .catch(err => console.error('Erro marcar lida', err));
+};
+
+                notifList.appendChild(div);
+            });
+        })
+        .catch(err => {
+            notifList.innerHTML = '<p style="text-align:center;color:#777">Erro ao carregar.</p>';
+            console.error('Erro carregarNotificacoes', err);
+        });
+    }
+
+    // Abrir/fechar dropdown
+    notifIcon.addEventListener('click', function (e) {
+        e.stopPropagation();
+        const isOpen = notifDropdown.style.display === 'block';
+        notifDropdown.style.display = isOpen ? 'none' : 'block';
+        if (!isOpen) carregarNotificacoes();
+    });
+
+    document.addEventListener('click', function (e) {
+        if (!notifIcon.contains(e.target) && !notifDropdown.contains(e.target)) {
+            notifDropdown.style.display = 'none';
+        }
+    });
+
+    // Polling
+    atualizarBadge();
+    setInterval(atualizarBadge, pollingInterval);
+});
     </script>
 </body>
 </html>

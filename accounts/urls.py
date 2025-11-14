@@ -25,5 +25,8 @@ urlpatterns = [
     # --- Dashboard Admin ---
 path('graficos-tickets/', views.graficos_tickets, name='graficos_tickets'),
     path('chat/<int:ticket_id>/', views.chat_ticket, name='chat_ticket'),
-
+ path('notificacoes/verificar/', views.verificar_notificacoes, name='verificar_notificacoes'),
+    path('notificacoes/listar/', views.listar_notificacoes, name='listar_notificacoes'),
+    path('notificacoes/marcar/<int:notif_id>/', views.marcar_como_lida, name='marcar_como_lida'),
 ]
+

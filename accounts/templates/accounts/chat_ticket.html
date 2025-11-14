@@ -1,29 +1,51 @@
-<h2>Chat do Chamado: {{ ticket.titulo }}</h2>
+<h2 style="margin-bottom:15px; color:#2563eb;">Chat do Chamado: {{ ticket.titulo }}</h2>
 
 <div id="chat-box" style="
-    border:1px solid #ccc; 
-    padding:10px; 
-    height:400px; 
-    overflow-y:auto; 
-    background:#f9f9f9;
-    border-radius:8px;
-">
+       border:1px solid #ccc;
+    padding:15px;
+    height:400px;
+    overflow-y:auto;
+    background:#f4f6f8;
+    border-radius:12px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    scrollbar-width: none;
+        -ms-overflow-style: none;"
+        >
     <!-- mensagens carregadas via Ajax -->
 </div>
 
-<form id="form-chat" style="margin-top:10px; display:flex;">
-    <textarea id="texto-mensagem" placeholder="Digite sua mensagem..." required 
-        style="flex:1; padding:10px; border-radius:6px; border:1px solid #ccc;"></textarea>
+<form id="form-chat" style="
+    margin-top:10px;
+    display:flex;
+    gap:10px;
+    align-items:flex-end;
+">
+    <textarea id="texto-mensagem" placeholder="Digite sua mensagem..." required
+        style="
+            flex:1;
+            padding:12px;
+            border-radius:8px;
+            border:1px solid #ccc;
+            font-size:0.95rem;
+            resize:none;
+        "></textarea>
     <button type="submit" style="
-        margin-left:5px; 
-        padding:10px 20px; 
-        border:none; 
-        background:#4CAF50; 
-        color:white; 
-        border-radius:6px; 
+        padding:12px 20px;
+        border:none;
+        background:#2563eb;
+        color:white;
+        border-radius:8px;
         cursor:pointer;
-    ">Enviar</button>
+        font-weight:500;
+        transition: background 0.3s;
+    " onmouseover="this.style.background='#1d4ed8';" onmouseout="this.style.background='#2563eb';">
+        Enviar
+    </button>
 </form>
+
 
 <script>
 const ticketId = {{ ticket.id }};
