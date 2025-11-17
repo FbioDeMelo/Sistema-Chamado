@@ -200,16 +200,10 @@
         <li><a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> <span>Sair</span></a></li>
     </ul>
 </div>
-
 <div id="preloader">
   <div class="loader"></div>
 </div>
-
-
-    <!-- Main Content -->
     <div class="main-content">
-
-        <!-- Header -->
         <div class="header">
             <div class="user-info">
                 <div class="user-avatar">{{ request.user.username|first|upper }}</div>
@@ -218,14 +212,11 @@
                     <p>{{ request.user.get_role_display }}</p>
                 </div>
             </div>
-                    <!-- Sininho de notificações -->
         <div class="notif-container">
             <div id="notif-icon">
                 <i class="fas fa-bell"></i>
                 <span id="notif-badge" class="notif-badge" style="display:none;">0</span>
             </div>
-
-            <!-- Dropdown -->
             <div id="notif-dropdown" class="notif-dropdown" style="display:none;">
                 <h4>Notificações</h4>
                 <div id="notif-list">
@@ -235,8 +226,6 @@
         </div>
             <a href="{% url 'logout' %}" class="btn"><i class="fas fa-sign-out-alt"></i> Sair</a>
         </div>
-
-        <!-- Cards Dinâmicos -->
         <h2 class="section-title">Ações Rápidas</h2>
         <div class="card-container">
             {% for card in cards %}

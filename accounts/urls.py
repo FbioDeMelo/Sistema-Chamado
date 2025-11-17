@@ -29,4 +29,3 @@ path('graficos-tickets/', views.graficos_tickets, name='graficos_tickets'),
     path('notificacoes/listar/', views.listar_notificacoes, name='listar_notificacoes'),
     path('notificacoes/marcar/<int:notif_id>/', views.marcar_como_lida, name='marcar_como_lida'),
 ]
-

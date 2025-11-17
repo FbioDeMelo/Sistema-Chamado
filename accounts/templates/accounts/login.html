@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -18,6 +19,8 @@
             --success: #10b981;
             --danger: #ef4444;
             --warning: #f59e0b;
+            --accent: #ea005f;
+            --accent-hover: #c4004d;
         }
 
         * {
@@ -28,7 +31,7 @@
         }
 
         body {
-            background: linear-gradient(135deg, #1e293b 0%, #1e293b 100%);
+            background: linear-gradient(135deg, #ffffff 0%, #ffffff 100%);
             color: var(--dark);
             display: flex;
             justify-content: center;
@@ -45,18 +48,18 @@
             background: white;
             border-radius: 20px;
             overflow: hidden;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
         }
 
         .login-wrapper:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            transform: translateY(-8px);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
         }
 
         .login-illustration {
             flex: 1.2;
-            background: linear-gradient(#000000);
+            background: linear-gradient(135deg, #000000 0%, #000000 100%);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -89,19 +92,23 @@
             font-size: 5.5rem;
             margin-bottom: 25px;
             opacity: 0.9;
-            filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.2));
+            filter: drop-shadow(0 5px 15px rgba(255, 255, 255, 0.3));
+            color:white;
         }
 
         .illustration-title {
-            font-size: 2rem;
+            font-size: 2.2rem;
             margin-bottom: 20px;
-            font-weight: 700;
+            font-weight: 800;
             letter-spacing: 0.5px;
+            background: linear-gradient(to right, #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .illustration-text {
-            font-size: 1.05rem;
-            opacity: 0.9;
+            font-size: 1.1rem;
+            opacity: 0.85;
             line-height: 1.7;
             margin-bottom: 30px;
         }
@@ -118,17 +125,24 @@
             display: flex;
             align-items: center;
             gap: 12px;
+            padding: 8px 0;
         }
 
         .feature i {
             font-size: 1.2rem;
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.15);
             width: 32px;
             height: 32px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .feature:hover i {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(1.1);
         }
 
         .login-container {
@@ -137,7 +151,8 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            background: black;
+            background: white;
+            position: relative;
         }
 
         .logo {
@@ -147,22 +162,23 @@
             color: var(--primary);
         }
 
-        .logo-icon {
-            font-size: 2.2rem;
-            margin-right: 12px;
-        }
-
-        .logo-text {
-            font-size: 1.6rem;
-            font-weight: 800;
-            letter-spacing: 0.5px;
+        .logo-img {
+            height: 50px;
+            width: auto;
         }
 
         h2 {
             margin-bottom: 10px;
-            color: white;
+            color: var(--dark);
             font-size: 1.9rem;
             font-weight: 700;
+        }
+
+        h3 {
+            color: var(--dark);
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            font-weight: 600;
         }
 
         .subtitle {
@@ -188,17 +204,19 @@
         input {
             width: 100%;
             padding: 16px 16px 16px 48px;
-            border: 1px solid var(--gray-light);
-            border-radius: 10px;
+            border: 1.5px solid var(--gray-light);
+            border-radius: 12px;
             font-size: 1rem;
             transition: all 0.3s ease;
             background: white;
+            color: var(--dark);
         }
 
         input:focus {
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+            transform: translateY(-2px);
         }
 
         input:focus + .input-icon {
@@ -230,34 +248,49 @@
         .remember {
             display: flex;
             align-items: center;
-            color:white;
+            color: var(--dark);
         }
 
         .remember input {
             width: auto;
             margin-right: 8px;
-            accent-color: #ea005f;
+            accent-color: var(--accent);
         }
 
         .forgot-password {
-            color: #ea005f;
+            color: var(--accent);
             text-decoration: none;
-            transition: color 0.3s ease;
+            transition: all 0.3s ease;
             font-weight: 500;
+            position: relative;
+        }
+
+        .forgot-password:after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent);
+            transition: width 0.3s ease;
         }
 
         .forgot-password:hover {
-            color: #ea005f;
-            text-decoration: underline;
+            color: var(--accent-hover);
+        }
+
+        .forgot-password:hover:after {
+            width: 100%;
         }
 
         button {
             width: 100%;
             padding: 16px;
-            background: #ea005f;
+            background: var(--accent);
             color: white;
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
             font-size: 1.05rem;
             font-weight: 600;
             cursor: pointer;
@@ -266,11 +299,29 @@
             justify-content: center;
             align-items: center;
             letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
         }
 
         button:hover {
             transform: translateY(-3px);
-            box-shadow: 0 8px 20px #ea005f;
+            box-shadow: 0 10px 25px rgba(234, 0, 95, 0.4);
+            background: var(--accent-hover);
+        }
+
+        button:hover:before {
+            left: 100%;
         }
 
         button:active {
@@ -315,7 +366,7 @@
             justify-content: center;
             align-items: center;
             background: white;
-            border: 1px solid var(--gray-light);
+            border: 1.5px solid var(--gray-light);
             color: var(--dark);
             cursor: pointer;
             transition: all 0.3s ease;
@@ -324,7 +375,7 @@
 
         .social-btn:hover {
             transform: translateY(-3px);
-            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
         }
 
         .google:hover {
@@ -356,11 +407,26 @@
             text-decoration: none;
             font-weight: 600;
             transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .register a:after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: width 0.3s ease;
         }
 
         .register a:hover {
             color: var(--primary-dark);
-            text-decoration: underline;
+        }
+
+        .register a:hover:after {
+            width: 100%;
         }
 
         .message {
@@ -395,14 +461,16 @@
             .login-wrapper {
                 flex-direction: column;
                 height: auto;
+                max-width: 90%;
             }
             
             .login-illustration {
                 padding: 30px 20px;
+                order: 2;
             }
             
             .illustration-icon {
-                font-size: 4rem;
+                font-size: 3.5rem;
             }
             
             .illustration-title {
@@ -411,6 +479,11 @@
             
             .login-container {
                 padding: 40px 30px;
+                order: 1;
+            }
+            
+            .logo-img {
+                height: 40px;
             }
         }
 
@@ -433,6 +506,10 @@
                 width: 45px;
                 height: 45px;
             }
+            
+            h3 {
+                font-size: 1.3rem;
+            }
         }
 
         /* Animações */
@@ -445,10 +522,6 @@
             from { opacity: 0; transform: translateX(-20px); }
             to { opacity: 1; transform: translateX(0); }
         }
-        h3{
-           color:gray
-        }
-        
 
         .login-container > * {
             animation: fadeIn 0.6s ease forwards;
@@ -462,35 +535,36 @@
         .login-container > *:nth-child(6) { animation-delay: 0.6s; }
         .login-container > *:nth-child(7) { animation-delay: 0.7s; }
         .login-container > *:nth-child(8) { animation-delay: 0.8s; }
+
         /* Preloader */
-#preloader {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(255, 255, 255, 0.8);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-}
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            backdrop-filter: blur(5px);
+        }
 
-.spinner {
-    width: 60px;
-    height: 60px;
-    border: 6px solid var(--primary);
-    border-top-color: transparent;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 6px solid var(--primary);
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
 
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
     </style>
 </head>
 <body>
@@ -523,13 +597,15 @@
         </div>
         <div class="login-container">
             <div class="logo">
-        <img class="logo-img" 
-             src="https://institutolibano.com.br/_next/image?url=%2Froot%2Flogo-website-branca.webp&w=384&q=75" 
-             alt="Instituto Líbano">            </div>
+                <img class="logo-img" 
+                     src="https://institutolibano.com.br/_next/image?url=%2Froot%2Flogo-website-colorida.webp&w=640&q=75" 
+                     alt="Instituto Líbano">
+            </div>
             
             <h3>Bem-vindo de volta</h3>
             <p class="subtitle">Faça login para acessar sua conta</p>
-                        {% if messages %}
+            
+            {% if messages %}
                 {% for message in messages %}
                     <div class="message 
                         {% if message.tags %}{{ message.tags }}{% endif %}">
@@ -537,6 +613,7 @@
                     </div>
                 {% endfor %}
             {% endif %}
+            
             <form method="post">
                 {% csrf_token %}
                 <div class="form-group">
@@ -559,10 +636,13 @@
                     <i class="fas fa-sign-in-alt button-icon"></i> Entrar
                 </button>
             </form>
+        </div>
     </div>
-<div id="preloader" style="display: none;">
-    <div class="spinner"></div>
-</div>
+    
+    <div id="preloader" style="display: none;">
+        <div class="spinner"></div>
+    </div>
+    
     <script>
         // Toggle password visibility
         document.getElementById('togglePassword').addEventListener('click', function() {
@@ -606,9 +686,10 @@
                 this.style.transform = 'translateY(0)';
             });
         });
+        
         document.querySelector('form').addEventListener('submit', function () {
-    const preloader = document.getElementById('preloader');
-    preloader.style.display = 'flex';
+            const preloader = document.getElementById('preloader');
+            preloader.style.display = 'flex';
         });
     </script>
 </body>

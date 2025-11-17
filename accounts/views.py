@@ -437,4 +437,3 @@ def marcar_como_lida(request, notif_id):
     n.save()
     return JsonResponse({'sucesso': True, 'target_url': n.target_url})
 
-

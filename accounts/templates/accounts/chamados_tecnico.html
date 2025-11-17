@@ -21,8 +21,6 @@
         }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #f1f5f9; color: var(--dark); display: flex; min-height: 100vh; }
-
-        /* Sidebar */
         .sidebar { width: var(--sidebar-width); background: var(--dark); color: white; height: 100vh; position: fixed; padding: 20px 0; }
         .logo { text-align: center; padding: 20px 0; border-bottom: 1px solid #334155; margin-bottom: 20px; }
         .logo h2 { font-size: 1.5rem; display: flex; align-items: center; justify-content: center; gap: 10px; }
@@ -31,34 +29,22 @@
         .nav-links a { display: flex; align-items: center; gap: 12px; color: var(--gray); text-decoration: none; padding: 12px 15px; border-radius: 8px; transition: all 0.3s; }
         .nav-links a:hover, .nav-links a.active { background: rgba(255,255,255,0.1); color: white; }
         .nav-links i { width: 20px; text-align: center; }
-
-        /* Main Content */
         .main-content { flex: 1; margin-left: var(--sidebar-width); padding: 20px; }
-
-        /* Header */
         .header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px 25px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 25px; }
         .user-info { display: flex; align-items: center; gap: 15px; }
         .user-avatar { width: 45px; height: 45px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; }
         .user-details h3 { margin-bottom: 5px; }
         .user-details p { color: var(--secondary); font-size: 0.9rem; }
-
-        /* Cards */
         .section-title { margin: 25px 0 15px; font-size: 1.3rem; color: var(--dark); }
         .card-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
         .card { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.3s ease, box-shadow 0.3s ease; border-top: 4px solid var(--primary); }
         .card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px rgba(0,0,0,0.1); }
         .card p { color: var(--secondary); margin-bottom: 10px; line-height: 1.5; }
-
-        /* Form */
         form { margin-top: 10px; }
         input[type="hidden"] { display: none; }
         button { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 500; transition: background 0.3s; }
         button:hover { background: var(--primary-dark); }
-
-        /* Footer */
         .footer { text-align: center; margin-top: 400px; padding: 20px; color: var(--secondary); font-size: 0.9rem; }
-
-        /* Responsive */
         @media (max-width: 768px) {
             .sidebar { width: 70px; overflow: hidden; }
             .logo h2 span, .nav-links a span { display: none; }
@@ -66,19 +52,17 @@
             .main-content { margin-left: 70px; }
             .header { flex-direction: column; gap: 15px; text-align: center; }
         }
-        /* Preloader */
-/* Preloader */
+
 #preloader {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.2); /* leve overlay escuro */
+  background: rgba(0, 0, 0, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 9999;
   transition: opacity 0.5s ease, visibility 0.5s ease;
 }
-
 .loader {
   width: 60px;
   aspect-ratio: 2;
@@ -90,14 +74,12 @@
   background-size: calc(100%/3) 50%;
   animation: l3 1s infinite linear;
 }
-
 @keyframes l3 {
   20% { background-position: 0%   0%, 50%  50%, 100% 50%; }
   40% { background-position: 0% 100%, 50%   0%, 100% 50%; }
   60% { background-position: 0%  50%, 50% 100%, 100%  0%; }
   80% { background-position: 0%  50%, 50%  50%, 100% 100%; }
 }
-
 #preloader.fade-out {
   opacity: 0;
   visibility: hidden;
@@ -109,7 +91,6 @@
     margin: 20px auto;
     content: url("https://institutolibano.com.br/_next/image?url=%2Froot%2Flogo-website-branca.webp&w=384&q=75");
 }
-/* Quando estiver em modo mobile */
 @media (max-width: 768px) {
     .logo-img {
         content: url("https://artigos.libanoeducacional.com.br/cropped-logo-270x270.webp"); /* <- Coloque aqui a imagem para mobile */
@@ -129,7 +110,6 @@
     cursor: pointer;
     text-align: center;
 }
-/* Modal */
 .modal {
     display: none; 
     position: fixed;
@@ -142,7 +122,6 @@
     background-color: rgba(0,0,0,0.5);
     transition: opacity 0.3s ease;
 }
-
 .modal-content {
     background-color: white;
     margin: 15% auto;
@@ -153,39 +132,31 @@
     text-align: center;
     position: relative;
 }
-
 .modal-content h3 {
     margin-bottom: 15px;
     color: var(--dark);
 }
-
 .modal-content p {
     margin-bottom: 25px;
     color: var(--secondary);
 }
-
 .modal-buttons {
     display: flex;
     justify-content: space-between;
     gap: 10px;
 }
-
 .modal-buttons .btn.cancel {
     background-color: var(--gray);
 }
-
 .modal-buttons .btn.confirm {
     background-color: var(--danger);
 }
-
 .modal-buttons .btn.cancel:hover {
     background-color: #7f8c8d;
 }
-
 .modal-buttons .btn.confirm:hover {
     background-color: #dc2626;
 }
-
 .close {
     position: absolute;
     top: 10px;
@@ -195,7 +166,6 @@
     cursor: pointer;
     color: var(--secondary);
 }
-
 .close:hover {
     color: var(--dark);
 }
@@ -203,7 +173,6 @@
     text-align: center;
     margin: 20px 0;
 }
-
 .pagination .step-links a,
 .pagination .step-links .current {
     display: inline-block;
@@ -215,11 +184,9 @@
     border-radius: 4px;
     transition: background-color 0.3s;
 }
-
 .pagination .step-links a:hover {
     background-color: #0056b3;
 }
-
 .pagination .step-links .current {
     background-color: #6c757d;
     cursor: default;
@@ -231,7 +198,6 @@
     margin: 20px auto;
     content: url("https://institutolibano.com.br/_next/image?url=%2Froot%2Flogo-website-branca.webp&w=384&q=75");
 }
-/* Quando estiver em modo mobile */
 @media (max-width: 768px) {
     .logo-img {
         content: url("https://artigos.libanoeducacional.com.br/cropped-logo-270x270.webp"); /* <- Coloque aqui a imagem para mobile */
@@ -246,30 +212,25 @@
     font-family: Arial, sans-serif;
     border: 1px solid #ccc;
     border-radius: 8px;
-    resize: vertical; /* permite aumentar apenas para baixo */
+    resize: vertical;
     outline: none;
     transition: border-color 0.25s, box-shadow 0.25s;
 }
-
 #texto-mensagem-tecnico:focus {
     border-color: #4a90e2;
     box-shadow: 0 0 4px rgba(74, 144, 226, 0.4);
 }
-/* Container */
 .notif-container {
     position: relative;
     margin-right: 25px;
     cursor: pointer;
 }
-
 #notif-icon {
     font-size: 22px;
     color: #333;
     position: relative;
-    cursor: pointer; /* Adicione esta linha */
+    cursor: pointer; 
 }
-
-/* Badge (bolinha vermelha) */
 .notif-badge {
     position: absolute;
     top: -8px;
@@ -281,8 +242,6 @@
     border-radius: 50%;
     font-weight: bold;
 }
-
-/* Dropdown */
 .notif-dropdown {
     position: absolute;
     right: -10px;
@@ -293,31 +252,26 @@
     border-radius: 8px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.15);
     overflow-y: auto;
-    z-index: 9999; /* Aumente de 999 para 9999 */
+    z-index: 9999; 
 }
-
 .notif-dropdown h4 {
     padding: 10px;
     margin: 0;
     background: #f3f3f3;
     font-size: 15px;
 }
-
 .notif-item {
     padding: 10px;
     border-bottom: 1px solid #eee;
     cursor: pointer;
 }
-
 .notif-item:hover {
     background: #f0f0f0;
 }
-
 .notif-item.unread {
     background: #e8f0ff;
     font-weight: bold;
 }
-
     </style>
 </head>
 <body>
@@ -329,7 +283,6 @@
     </div>
         <ul class="nav-links">
             <li><a href="{% url 'index' %}"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
-
             {% if user.role == 'colaborador' %}
                 <li><a href="{% url 'chamados_colaborador' %}"><i class="fas fa-list"></i> <span>Meus Chamados</span></a></li>
             {% elif user.role == 'tecnico' %}
@@ -340,16 +293,11 @@
                 <li><a href="{% url 'gerenciar_usuarios' %}"><i class="fas fa-user-cog"></i> <span>Gerenciar Usuários</span></a></li>
                 <li><a href="{% url 'graficos_tickets' %}"><i class="fas fa-chart-bar"></i> <span>Gráficos de Atendimentos</span></a></li>
             {% endif %}
-
             <li><a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> <span>Sair</span></a></li>
         </ul>
     </div>
-
 <div class="main-content">
-    <!-- Header -->
     <div class="header">
-
-        <!-- Área de usuário -->
         <div class="user-info">
             <div class="user-avatar">{{ request.user.username|first|upper }}</div>
             <div class="user-details">
@@ -357,15 +305,11 @@
                 <p>{{ request.user.get_role_display }}</p>
             </div>
         </div>
-
-        <!-- Sininho de notificações -->
         <div class="notif-container">
             <div id="notif-icon">
                 <i class="fas fa-bell"></i>
                 <span id="notif-badge" class="notif-badge" style="display:none;">0</span>
             </div>
-
-            <!-- Dropdown -->
             <div id="notif-dropdown" class="notif-dropdown" style="display:none;">
                 <h4>Notificações</h4>
                 <div id="notif-list">
@@ -373,13 +317,10 @@
                 </div>
             </div>
         </div>
-
-        <!-- Botão de sair -->
         <a href="{% url 'logout' %}" class="btn">
             <i class="fas fa-sign-out-alt"></i> Sair
         </a>
     </div>
-        <!-- Chamados Ativos -->
         <h2 class="section-title">Chamados Ativos</h2>
         <div class="card-container">
             {% for chamado in chamados_ativos %}
@@ -399,7 +340,6 @@
         <i class="fas fa-comments"></i> Chat
     </button>
 </form>
-
                 </div>
             {% empty %}
                 <div class="card">
@@ -418,7 +358,6 @@
         </div>
     </div>
 </div>
-<!-- Paginação para Chamados Ativos -->
 <div class="pagination text-center mt-6">
   <div class="inline-flex items-center space-x-2 text-sm">
     
@@ -450,11 +389,7 @@
 
   </div>
 </div>
-
-
-<!-- Chamados Concluídos -->
 <h2 class="section-title text-xl font-semibold mt-10 mb-4 text-gray-800">Chamados Concluídos</h2>
-
 <div class="card-container grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
   {% for chamado in chamados_concluidos %}
     <div class="card bg-white shadow-md rounded-xl p-4 border border-gray-100 hover:shadow-lg transition">
@@ -475,7 +410,6 @@
     </div>
   {% endfor %}
 </div>
-<!-- Modal do Chat Técnico -->
 <div id="modalChatTecnico" class="modal">
     <div class="modal-content">
         <span class="close">&times;</span>
@@ -502,9 +436,6 @@
         </form>
     </div>
 </div>
-
-
-<!-- Paginação para Chamados Concluídos -->
 <div class="pagination text-center mt-6 mb-8">
   <div class="inline-flex items-center space-x-2 text-sm">
     
@@ -536,23 +467,18 @@
 
   </div>
 </div>
-
 <div id="preloader">
   <div class="loader"></div>
 </div>
-
-
-        <!-- Footer -->
         <div class="footer">
             <p>Sistema de Chamados TI &copy; {% now "Y" %} - Todos os direitos reservados</p>
         </div>
-
     </div>
     <script>
            window.addEventListener('load', function() {
         const preloader = document.getElementById('preloader');
         preloader.classList.add('fade-out');
-        setTimeout(() => preloader.style.display = 'none', 500); // total transition time
+        setTimeout(() => preloader.style.display = 'none', 500);
     });
     function abrirModal(tituloChamado, form) {
     const modal = document.getElementById('modalConfirm');
@@ -563,34 +489,29 @@
 
     modalMessage.textContent = `Você tem certeza que deseja fechar o chamado: "${tituloChamado}"?`;
     modal.style.display = 'block';
-
-    // Confirmar
     confirmBtn.onclick = function() {
-        modal.style.display = 'none';
-        form.submit();
-    }
-
-    // Cancelar
+    modal.style.display = 'none';
+    const preloader = document.getElementById('preloader');
+    preloader.style.display = 'flex';
+    preloader.classList.remove('fade-out');
+    document.body.style.overflow = 'hidden';
+    form.submit();
+}
     cancelBtn.onclick = closeBtn.onclick = function() {
         modal.style.display = 'none';
     }
-
-    // Fechar clicando fora do modal
     window.onclick = function(event) {
         if (event.target == modal) {
             modal.style.display = 'none';
         }
     }
 
-    return false; // Evita submissão do form imediatamente
+    return false;
 }
-// Modal chat técnico
 const modalChatTec = document.getElementById("modalChatTecnico");
 const spanChatTec = modalChatTec.querySelector(".close");
 const chatTituloTec = document.getElementById("chat-titulo-tecnico");
 let currentTicketIdTec = null;
-
-// Abrir modal com ticket específico
 document.querySelectorAll(".btn-open-chat-tecnico").forEach(btn => {
     btn.onclick = () => {
         currentTicketIdTec = btn.dataset.ticketId;
@@ -599,12 +520,8 @@ document.querySelectorAll(".btn-open-chat-tecnico").forEach(btn => {
         carregarMensagensTec();
     }
 });
-
-// Fechar modal
 spanChatTec.onclick = () => modalChatTec.style.display = "none";
 window.onclick = e => { if(e.target == modalChatTec) modalChatTec.style.display = "none"; };
-
-// Função para carregar mensagens via Ajax
 function carregarMensagensTec() {
     if(!currentTicketIdTec) return;
     fetch(`/chat/${currentTicketIdTec}/`)
@@ -614,8 +531,8 @@ function carregarMensagensTec() {
             chatBox.innerHTML = '';
             data.mensagens.forEach(m => {
                 const div = document.createElement('div');
-const usuarioAtual = "{{ request.user.username }}";  // será substituído pelo Django ao renderizar o template
-const isAutor = m.autor === usuarioAtual;                div.style.padding = '8px';
+                const usuarioAtual = "{{ request.user.username }}";  
+                const isAutor = m.autor === usuarioAtual;                div.style.padding = '8px';
                 div.style.marginBottom = '5px';
                 div.style.borderRadius = '10px';
                 div.style.background = isAutor ? '#DCF8C6' : '#FFF';
@@ -625,16 +542,12 @@ const isAutor = m.autor === usuarioAtual;                div.style.padding = '8p
             chatBox.scrollTop = chatBox.scrollHeight;
         });
 }
-
-// Enviar mensagem via Ajax
 document.getElementById('form-chat-tecnico').addEventListener('submit', e => {
     e.preventDefault();
     const texto = document.getElementById('texto-mensagem-tecnico').value;
     if(!currentTicketIdTec || !texto) return;
-
     const formData = new FormData();
     formData.append('texto', texto);
-
     fetch(`/chat/${currentTicketIdTec}/`, {
         method: 'POST',
         headers: {'X-CSRFToken': '{{ csrf_token }}'},
@@ -648,20 +561,13 @@ document.getElementById('form-chat-tecnico').addEventListener('submit', e => {
         }
     });
 });
-
-// Atualiza chat automaticamente a cada 2s
 setInterval(carregarMensagensTec, 2000);
-
 document.addEventListener("DOMContentLoaded", function () {
-    // Elements
     const notifIcon = document.getElementById("notif-icon");
     const notifBadge = document.getElementById("notif-badge");
     const notifDropdown = document.getElementById("notif-dropdown");
     const notifList = document.getElementById("notif-list");
-
-    let pollingInterval = 5000; // 5s
-
-    // Helper CSRF cookie
+    let pollingInterval = 5000;
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -677,8 +583,6 @@ document.addEventListener("DOMContentLoaded", function () {
         return cookieValue;
     }
     const csrftoken = getCookie('csrftoken');
-
-    // Atualiza badge
     function atualizarBadge() {
         fetch("{% url 'verificar_notificacoes' %}")
         .then(res => res.json())
@@ -693,8 +597,6 @@ document.addEventListener("DOMContentLoaded", function () {
         })
         .catch(err => console.error("Erro badge:", err));
     }
-
-    // Carrega lista completa ao abrir
     function carregarNotificacoes() {
         notifList.innerHTML = '<p style="text-align:center;color:#777">Carregando...</p>';
         fetch("{% url 'listar_notificacoes' %}")
@@ -706,7 +608,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 notifList.innerHTML = '<p style="text-align:center;color:#777;padding:10px">Nenhuma notificação.</p>';
                 return;
             }
-
             lista.forEach(n => {
                 const div = document.createElement('div');
                 div.className = 'notif-item' + (n.is_read ? '' : ' unread');
@@ -724,7 +625,6 @@ document.addEventListener("DOMContentLoaded", function () {
     .then(res => res.json())
     .then(r => {
         if (r.sucesso) {
-            // Atualiza a badge e o estilo do item
             atualizarBadge();
             div.classList.remove('unread');
         } else {
@@ -733,7 +633,6 @@ document.addEventListener("DOMContentLoaded", function () {
     })
     .catch(err => console.error('Erro marcar lida', err));
 };
-
                 notifList.appendChild(div);
             });
         })
@@ -742,8 +641,6 @@ document.addEventListener("DOMContentLoaded", function () {
             console.error('Erro carregarNotificacoes', err);
         });
     }
-
-    // pequenas utilidades
     function escapeHtml(unsafe) {
         if (!unsafe) return '';
         return unsafe
@@ -753,22 +650,17 @@ document.addEventListener("DOMContentLoaded", function () {
              .replace(/"/g, "&quot;")
              .replace(/'/g, "&#039;");
     }
-
-    // Abrir/fechar dropdown
     notifIcon.addEventListener('click', function (e) {
         e.stopPropagation();
         const isOpen = notifDropdown.style.display === 'block';
         notifDropdown.style.display = isOpen ? 'none' : 'block';
         if (!isOpen) carregarNotificacoes();
     });
-
     document.addEventListener('click', function (e) {
         if (!notifIcon.contains(e.target) && !notifDropdown.contains(e.target)) {
             notifDropdown.style.display = 'none';
         }
     });
-
-    // Polling
     atualizarBadge();
     setInterval(atualizarBadge, pollingInterval);
 });
