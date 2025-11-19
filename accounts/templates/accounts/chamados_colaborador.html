@@ -18,9 +18,20 @@
             --dark: #1e293b;
             --gray: #94a3b8;
             --sidebar-width: 250px;
+            --chat-message-sent: #2563eb;
+            --chat-message-received: #f1f5f9;
+            --chat-timestamp: #94a3b8;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #f1f5f9; color: var(--dark); display: flex; min-height: 100vh; }
+
+        /* Classe para bloquear a rolagem quando o modal está aberto */
+        body.no-scroll {
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
 
         /* Sidebar */
         .sidebar { width: var(--sidebar-width); background: var(--dark); color: white; height: 100vh; position: fixed; padding: 20px 0; }
@@ -138,9 +149,9 @@
   aspect-ratio: 2;
   --_g: no-repeat radial-gradient(circle closest-side, var(--primary) 90%, #0000);
   background:
-    var(--_g) 0%   50%,
-    var(--_g) 50%  50%,
-    var(--_g) 100% 50%;
+    var(_g) 0%   50%,
+    var(_g) 50%  50%,
+    var(_g) 100% 50%;
   background-size: calc(100%/3) 50%;
   animation: l3 1s infinite linear;
 }
@@ -175,8 +186,9 @@
     margin: 20px 0;
 }
 
-.pagination .step-links a,
-.pagination .step-links .current {
+/* CORREÇÃO: CSS para a paginação foi ajustado para corresponder à estrutura HTML */
+.pagination a,
+.pagination span.current {
     display: inline-block;
     padding: 8px 12px;
     margin: 0 4px;
@@ -187,13 +199,20 @@
     transition: background-color 0.3s;
 }
 
-.pagination .step-links a:hover {
+.pagination a:hover {
     background-color: #0056b3;
 }
 
-.pagination .step-links .current {
+.pagination span.current {
     background-color: #6c757d;
     cursor: default;
+    color: white;
+}
+
+/* Estilos para os spans desabilitados (Anterior/Próxima) */
+.pagination span:not(.current) {
+    background-color: #e9ecef;
+    color: #6c757d;
 }
 /* Fundo semitransparente cobrindo a tela */
 #loading-overlay {
@@ -305,6 +324,591 @@
     background: #e8f0ff;
     font-weight: bold;
 }
+
+/* Estilos aprimorados para o chat do colaborador */
+#modalChat {
+    display: none;
+    position: fixed;
+    z-index: 10000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5);
+}
+
+#modalChat .modal-content {
+    background-color: white;
+    margin: 3% auto;
+    padding: 0;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 800px;
+    height: 85vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.chat-header {
+    background-color: var(--primary);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.chat-header h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+.chat-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+}
+
+.status-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #10b981;
+    animation: pulse 2s infinite;
+}
+
+.status-indicator.offline {
+    background-color: #ef4444;
+    animation: none;
+}
+
+.status-indicator.away {
+    background-color: #f59e0b;
+    animation: none;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    }
+}
+
+.chat-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.chat-container {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    background-color: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.chat-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chat-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.chat-container::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+}
+
+.chat-container::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+.message {
+    display: flex;
+    gap: 10px;
+    max-width: 80%;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.message.sent {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+}
+
+.message-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: var(--primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.message.received .message-avatar {
+    background-color: var(--secondary);
+}
+
+.message-content {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.message-bubble {
+    padding: 12px 16px;
+    border-radius: 18px;
+    position: relative;
+    word-wrap: break-word;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.message.sent .message-bubble {
+    background-color: var(--chat-message-sent);
+    color: white;
+    border-top-right-radius: 4px;
+}
+
+.message.received .message-bubble {
+    background-color: var(--chat-message-received);
+    color: var(--dark);
+    border-top-left-radius: 4px;
+}
+
+.message-info {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.75rem;
+    color: var(--chat-timestamp);
+    padding: 0 5px;
+}
+
+.message.sent .message-info {
+    justify-content: flex-end;
+}
+
+.message-status {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.typing-indicator {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    padding: 15px 20px;
+    background-color: #f1f5f9;
+    border-radius: 18px;
+    width: fit-content;
+    margin-bottom: 15px;
+}
+
+.typing-indicator.active {
+    display: flex;
+}
+
+.typing-dots {
+    display: flex;
+    gap: 4px;
+}
+
+.typing-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--secondary);
+    animation: typing 1.4s infinite ease-in-out;
+}
+
+.typing-dot:nth-child(1) {
+    animation-delay: -0.32s;
+}
+
+.typing-dot:nth-child(2) {
+    animation-delay: -0.16s;
+}
+
+@keyframes typing {
+    0%, 80%, 100% {
+        transform: scale(0.8);
+        opacity: 0.5;
+    }
+    40% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.chat-input-container {
+    padding: 15px 20px;
+    background-color: white;
+    border-top: 1px solid #e2e8f0;
+    border-radius: 0 0 12px 12px;
+}
+
+.chat-input-wrapper {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+.chat-input {
+    flex: 1;
+    border: 1px solid #e2e8f0;
+    border-radius: 24px;
+    padding: 10px 15px;
+    resize: none;
+    max-height: 120px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.chat-input:focus {
+    border-color: var(--primary);
+}
+
+.chat-input-tools {
+    display: flex;
+    gap: 8px;
+}
+
+.chat-tool-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background-color: #f1f5f9;
+    color: var(--secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.chat-tool-btn:hover {
+    background-color: #e2e8f0;
+    color: var(--primary);
+}
+
+.chat-send-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background-color: var(--primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.chat-send-btn:hover {
+    background-color: var(--primary-dark);
+}
+
+.chat-send-btn:disabled {
+    background-color: var(--gray);
+    cursor: not-allowed;
+}
+
+.emoji-picker {
+    position: absolute;
+    bottom: 60px;
+    right: 20px;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    padding: 10px;
+    display: none;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 5px;
+    z-index: 100;
+}
+
+.emoji-picker.active {
+    display: grid;
+}
+
+.emoji-btn {
+    width: 30px;
+    height: 30px;
+    border: none;
+    background: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.emoji-btn:hover {
+    background-color: #f1f5f9;
+}
+
+.quick-replies {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0 20px 10px;
+    background-color: white;
+}
+
+.quick-reply {
+    padding: 6px 12px;
+    border-radius: 16px;
+    background-color: #f1f5f9;
+    color: var(--dark);
+    border: none;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.quick-reply:hover {
+    background-color: #e2e8f0;
+}
+
+.new-message-notification {
+    position: absolute;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--primary);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    cursor: pointer;
+    animation: bounceIn 0.5s;
+    z-index: 10;
+}
+
+@keyframes bounceIn {
+    0% {
+        transform: translateX(-50%) translateY(-20px);
+        opacity: 0;
+    }
+    60% {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+    }
+    80% {
+        transform: translateX(-50%) translateY(-5px);
+    }
+    100% {
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+.chat-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.chat-close:hover {
+    transform: rotate(90deg);
+}
+
+/* Melhorias para responsividade do chat */
+@media (max-width: 768px) {
+    #modalChat .modal-content {
+        width: 100%;
+        height: 100vh;
+        margin: 0;
+        border-radius: 0;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+    }
+    
+    .chat-header {
+        border-radius: 0;
+        padding: 12px 15px;
+    }
+    
+    .chat-header h2 {
+        font-size: 1rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 60%;
+    }
+    
+    .chat-status {
+        font-size: 0.8rem;
+    }
+    
+    .chat-container {
+        padding: 15px;
+    }
+    
+    .message {
+        max-width: 90%;
+    }
+    
+    .message-bubble {
+        padding: 10px 14px;
+        font-size: 0.9rem;
+    }
+    
+    .message-info {
+        font-size: 0.7rem;
+    }
+    
+    .emoji-picker {
+        right: 10px;
+        bottom: 60px;
+        grid-template-columns: repeat(6, 1fr);
+        padding: 8px;
+    }
+    
+    .emoji-btn {
+        width: 28px;
+        height: 28px;
+        font-size: 1.1rem;
+    }
+    
+    .chat-input-container {
+        padding: 12px 15px;
+    }
+    
+    .chat-input {
+        font-size: 0.9rem;
+        padding: 8px 12px;
+    }
+    
+    .chat-tool-btn, .chat-send-btn {
+        width: 34px;
+        height: 34px;
+    }
+    
+    .quick-replies {
+        padding: 0 15px 8px;
+        gap: 6px;
+    }
+    
+    .quick-reply {
+        padding: 5px 10px;
+        font-size: 0.8rem;
+    }
+    
+    .new-message-notification {
+        top: 50px;
+        padding: 6px 12px;
+        font-size: 0.8rem;
+    }
+}
+
+/* Melhorias para dispositivos muito pequenos */
+@media (max-width: 480px) {
+    .chat-header h2 {
+        font-size: 0.9rem;
+        max-width: 50%;
+    }
+    
+    .chat-status {
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 4px;
+    }
+    
+    .status-indicator {
+        width: 8px;
+        height: 8px;
+    }
+    
+    .message-avatar {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .message-bubble {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+    
+    .chat-input {
+        font-size: 0.85rem;
+        padding: 7px 10px;
+    }
+    
+    .chat-tool-btn, .chat-send-btn {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .emoji-picker {
+        grid-template-columns: repeat(5, 1fr);
+    }
+    
+    .emoji-btn {
+        width: 26px;
+        height: 26px;
+        font-size: 1rem;
+    }
+    
+    .quick-reply {
+        padding: 4px 8px;
+        font-size: 0.75rem;
+    }
+}
     </style>
 </head>
 <body>
@@ -332,7 +936,7 @@
 
             <li><a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> <span>Sair</span></a></li>
         </ul>
-    </div>
+    </div>  
     <div class="main-content">
         <div class="header">
             <div class="user-info">
@@ -365,7 +969,7 @@
               <div class="card">
     <p><strong>Título:</strong> {{ chamado.titulo }}</p>
     <p><strong>Status:</strong> {{ chamado.status }}</p>
-    <button class="btn-open-chat" data-ticket-id="{{ chamado.id }}" data-ticket-titulo="{{ chamado.titulo }}">
+    <button class="btn-open-chat" data-ticket-id="{{ chamado.id }}" data-ticket-titulo="{{ chamado.titulo }}" data-ticket-tecnico="{{ chamado.tecnico.username|default:'Não atribuído' }}">
         <i class="fas fa-comments"></i> Chat
     </button>
 </div>
@@ -376,48 +980,104 @@
                 </div>
             {% endfor %}
         </div>
-<div class="pagination text-center mt-4">
-  <div class="inline-flex items-center space-x-2 text-sm">
-    
-    {% if todos_chamados.has_previous %}
-      <a href="?page={{ todos_chamados.previous_page_number }}" 
-         class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition">
-        ← Anterior
-      </a>
-    {% else %}
-      <span class="px-3 py-1 bg-gray-100 text-gray-400 rounded-md cursor-not-allowed">
-        ← Anterior
-      </span>
-    {% endif %}
+        
+        <!-- CORREÇÃO: Variável de paginação alterada de `todos_chamados` para `chamados` -->
+        <div class="pagination text-center mt-4">
+          <div class="inline-flex items-center space-x-2 text-sm">
+            
+            {% if chamados.has_previous %}
+              <a href="?page={{ chamados.previous_page_number }}" 
+                 class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition">
+                ← Anterior
+              </a>
+            {% else %}
+              <span class="px-3 py-1 bg-gray-100 text-gray-400 rounded-md cursor-not-allowed">
+                ← Anterior
+              </span>
+            {% endif %}
+        
+            <span class="px-4 py-1 font-medium text-gray-700">
+              Página <span class="font-semibold">{{ chamados.number }}</span> de {{ chamados.paginator.num_pages }}
+            </span>
+        
+            {% if chamados.has_next %}
+              <a href="?page={{ chamados.next_page_number }}" 
+                 class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition">
+                Próxima →
+              </a>
+            {% else %}
+              <span class="px-3 py-1 bg-gray-100 text-gray-400 rounded-md cursor-not-allowed">
+                Próxima →
+              </span>
+            {% endif %}
+            
+          </div>
+        </div>
 
-    <span class="px-4 py-1 font-medium text-gray-700">
-      Página <span class="font-semibold">{{ todos_chamados.number }}</span> de {{ todos_chamados.paginator.num_pages }}
-    </span>
-
-    {% if todos_chamados.has_next %}
-      <a href="?page={{ todos_chamados.next_page_number }}" 
-         class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition">
-        Próxima →
-      </a>
-    {% else %}
-      <span class="px-3 py-1 bg-gray-100 text-gray-400 rounded-md cursor-not-allowed">
-        Próxima →
-      </span>
-    {% endif %}
-    
-  </div>
-</div>
-<!-- Modal do Chat -->
+<!-- Modal do Chat Aprimorado -->
 <div id="modalChat" class="modal">
     <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>Chat do Chamado: <span id="chat-titulo"></span></h2>
-        <div id="chat-box" style="height:300px; overflow-y:auto; border:1px solid #ccc; padding:10px; border-radius:8px; background:#f9f9f9;"></div>
-        <form id="form-chat">
-            {% csrf_token %}
-            <textarea id="texto-mensagem" placeholder="Digite sua mensagem..." required></textarea>
-            <button type="submit"><i class="fas fa-paper-plane"></i> Enviar</button>
-        </form>
+        <div class="chat-header">
+            <h2>
+                <i class="fas fa-comments"></i>
+                Chat do Chamado: <span id="chat-titulo"></span>
+            </h2>
+            <div class="chat-status">
+                <span id="chat-tecnico-nome"></span>
+                <div id="status-indicator" class="status-indicator"></div>
+                <span id="status-text">Online</span>
+            </div>
+            <button class="chat-close">&times;</button>
+        </div>
+        
+        <div class="chat-body">
+            <div class="chat-container" id="chat-box">
+                <!-- As mensagens serão carregadas aqui -->
+            </div>
+            
+            <div class="typing-indicator" id="typing-indicator">
+                <div class="message-avatar">T</div>
+                <div class="typing-dots">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+                <span>Técnico digitando...</span>
+            </div>
+            
+            <div class="quick-replies">
+                <button class="quick-reply" data-message="Olá, preciso de ajuda com meu chamado.">Olá, preciso de ajuda com meu chamado.</button>
+                <button class="quick-reply" data-message="O problema ainda não foi resolvido.">O problema ainda não foi resolvido.</button>
+                <button class="quick-reply" data-message="Quando vocês podem me ajudar?">Quando vocês podem me ajudar?</button>
+                <button class="quick-reply" data-message="Obrigado pela ajuda!">Obrigado pela ajuda!</button>
+                <button class="quick-reply" data-message="Posso fornecer mais detalhes.">Posso fornecer mais detalhes.</button>
+            </div>
+            
+            <div class="chat-input-container">
+                <div class="chat-input-wrapper">
+                    <div class="chat-input-tools">
+                        <button class="chat-tool-btn" id="emoji-btn" title="Adicionar emoji">
+                            <i class="far fa-smile"></i>
+                        </button>
+                        <button class="chat-tool-btn" id="attach-btn" title="Anexar arquivo">
+                            <i class="fas fa-paperclip"></i>
+                        </button>
+                    </div>
+                    <textarea id="texto-mensagem" class="chat-input" placeholder="Digite sua mensagem..." rows="1"></textarea>
+                    <button id="send-message-btn" class="chat-send-btn" title="Enviar mensagem">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+                
+                <div class="emoji-picker" id="emoji-picker">
+                    <!-- Emojis serão adicionados via JavaScript -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="new-message-notification" id="new-message-notification" style="display: none;">
+            <i class="fas fa-arrow-down"></i> Novas mensagens
+        </div>
     </div>
 </div>
 
@@ -467,12 +1127,24 @@ span.onclick = function() {
     modal.style.display = "none";
 }
 
-// Fechar modal ao clicar fora do conteúdo
-window.onclick = function(event) {
+// CORREÇÃO: Os dois manipuladores de evento `window.onclick` foram combinados para evitar conflitos.
+window.addEventListener('click', function(event) {
+    // Fecha o modal de chamado se o clique for fora dele
     if (event.target == modal) {
         modal.style.display = "none";
     }
-}
+    // Fecha o modal de chat se o clique for fora dele
+    if (event.target == modalChat) {
+        modalChat.style.display = "none";
+        if (chatPollingInterval) {
+            clearInterval(chatPollingInterval);
+            chatPollingInterval = null;
+        }
+        // Remove a classe que bloqueia a rolagem
+        document.body.classList.remove('no-scroll');
+    }
+});
+
     window.addEventListener('load', function() {
         const preloader = document.getElementById('preloader');
         preloader.classList.add('fade-out');
@@ -488,10 +1160,60 @@ window.onclick = function(event) {
 
     });
 });
-const modalChat = document.getElementById("modalChat");
-const spanChat = modalChat.querySelector(".close");
-const chatTitulo = document.getElementById("chat-titulo");
+
+// Variáveis globais para o chat
 let currentTicketId = null;
+let currentTicketTecnico = null;
+let isTyping = false;
+let typingTimeout = null;
+let lastMessageCount = 0;
+let isUserAtBottom = true;
+let chatPollingInterval = null;
+
+// Elementos do DOM
+const modalChat = document.getElementById("modalChat");
+const chatCloseBtn = modalChat.querySelector(".chat-close");
+const chatTitulo = document.getElementById("chat-titulo");
+const chatTecnicoNome = document.getElementById("chat-tecnico-nome");
+const chatBox = document.getElementById('chat-box');
+const messageInput = document.getElementById('texto-mensagem');
+const sendBtn = document.getElementById('send-message-btn');
+const emojiBtn = document.getElementById('emoji-btn');
+const emojiPicker = document.getElementById('emoji-picker');
+const attachBtn = document.getElementById('attach-btn');
+const typingIndicator = document.getElementById('typing-indicator');
+const statusIndicator = document.getElementById('status-indicator');
+const statusText = document.getElementById('status-text');
+const newMessageNotification = document.getElementById('new-message-notification');
+const quickReplyBtns = document.querySelectorAll('.quick-reply');
+
+// Lista de emojis para o seletor
+const emojis = [
+    '😀', '😃', '😄', '😁', '😅', '😂', '🤣', '😊', '😇', '🙂', '😉', '😌', '😍', '🥰', '😘', '😗',
+    '😙', '😚', '😋', '😛', '😜', '🤪', '😝', '🤑', '🤗', '🤭', '🤫', '🤔', '🤐', '🤨', '😐', '😑',
+    '😶', '😏', '😒', '🙄', '😬', '🤥', '😌', '😔', '😪', '🤤', '😴', '😷', '🤒', '🤕', '🤢', '🤮',
+    '🤧', '🥵', '🥶', '🥴', '😵', '🤯', '🤠', '🥳', '😎', '🤓', '🧐', '😕', '😟', '🙁', '☹️', '😮',
+    '😯', '😲', '😳', '🥺', '😦', '😧', '😨', '😰', '😥', '😢', '😭', '😱', '😖', '😣', '😞', '😓',
+    '😩', '😫', '🥱', '😤', '😡', '😠', '🤬', '😈', '👿', '💀', '☠️', '💩', '🤡', '👹', '👺', '👻',
+    '👽', '👾', '🤖', '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '❣️', '💕', '💞',
+    '💓', '💗', '💖', '💘', '💝', '👍', '👎', '👌', '✌️', '🤞', '🤟', '🤘', '🤙', '👈', '👉', '👆',
+    '👇', '☝️', '✋', '🤚', '🖐️', '🖖', '👋', '🤙', '💪', '🙏'
+];
+
+// Inicializa o seletor de emojis
+function initEmojiPicker() {
+    emojis.forEach(emoji => {
+        const btn = document.createElement('button');
+        btn.className = 'emoji-btn';
+        btn.textContent = emoji;
+        btn.addEventListener('click', () => {
+            messageInput.value += emoji;
+            emojiPicker.classList.remove('active');
+            messageInput.focus();
+        });
+        emojiPicker.appendChild(btn);
+    });
+}
 
 // Função para obter o CSRF token correto
 function getCookie(name) {
@@ -514,76 +1236,400 @@ const csrftoken = getCookie('csrftoken');
 document.querySelectorAll(".btn-open-chat").forEach(btn => {
     btn.onclick = () => {
         currentTicketId = btn.dataset.ticketId;
+        currentTicketTecnico = btn.dataset.ticketTecnico;
         chatTitulo.textContent = btn.dataset.ticketTitulo;
+        chatTecnicoNome.textContent = currentTicketTecnico;
+        
+        // Resetar variáveis
+        lastMessageCount = 0;
+        isUserAtBottom = true;
+        
+        // Bloqueia a rolagem da página quando o modal é aberto
+        document.body.classList.add('no-scroll');
+        
+        // Mostra modal
         modalChat.style.display = "block";
+        
+        // Carrega mensagens
         carregarMensagens();
+        
+        // Inicia polling para novas mensagens
+        if (chatPollingInterval) clearInterval(chatPollingInterval);
+        chatPollingInterval = setInterval(carregarMensagens, 3000);
+        
+        // Simula status online (em uma implementação real, isso viria do backend)
+        if (currentTicketTecnico === 'Não atribuído') {
+            statusIndicator.classList.add('offline');
+            statusText.textContent = 'Não atribuído';
+        } else {
+            statusIndicator.classList.remove('offline', 'away');
+            statusText.textContent = 'Online';
+        }
     }
 });
 
-// Fechar modal
-spanChat.onclick = () => modalChat.style.display = "none";
-window.onclick = e => { if (e.target == modalChat) modalChat.style.display = "none"; };
+// Fecha o modal do chat
+chatCloseBtn.onclick = () => {
+    modalChat.style.display = "none";
+    // Remove a classe que bloqueia a rolagem
+    document.body.classList.remove('no-scroll');
+    if (chatPollingInterval) {
+        clearInterval(chatPollingInterval);
+        chatPollingInterval = null;
+    }
+};
 
+// Detecta se o usuário está no final do chat
+chatBox.addEventListener('scroll', () => {
+    isUserAtBottom = chatBox.scrollHeight - chatBox.scrollTop <= chatBox.clientHeight + 50;
+    if (isUserAtBottom && newMessageNotification.style.display !== 'none') {
+        newMessageNotification.style.display = 'none';
+    }
+});
+
+// Carrega as mensagens do chat
+// Carrega as mensagens do chat
+// Carrega as mensagens do chat
 function carregarMensagens() {
     if(!currentTicketId) return;
+    
     fetch(`/chat/${currentTicketId}/`)
         .then(res => res.json())
         .then(data => {
-            const chatBox = document.getElementById('chat-box');
-            const textarea = document.getElementById('texto-mensagem');
-            chatBox.innerHTML = '';
-
+            const wasAtBottom = isUserAtBottom;
+            const messageCount = data.mensagens.length;
+            const hasNewMessages = messageCount > lastMessageCount && lastMessageCount > 0;
+            
+            // Se não houver novas mensagens, não faz nada
+            if (!hasNewMessages && lastMessageCount > 0) {
+                // Apenas verifica o status do chat (concluído ou não)
+                if(data.status === 'concluido' && '{{ request.user.role }}' === 'colaborador') {
+                    if (!messageInput.disabled) {
+                        messageInput.disabled = true;
+                        messageInput.placeholder = 'Chamado concluído. Não é possível enviar mensagens.';
+                        sendBtn.disabled = true;
+                    }
+                } else {
+                    if (messageInput.disabled) {
+                        messageInput.disabled = false;
+                        messageInput.placeholder = 'Digite sua mensagem...';
+                        sendBtn.disabled = false;
+                    }
+                }
+                return;
+            }
+            
+            // Se houver novas mensagens e o usuário não estiver no final, mostra a notificação
+            if (hasNewMessages && !wasAtBottom) {
+                newMessageNotification.style.display = 'block';
+            } else if (wasAtBottom || lastMessageCount === 0) {
+                // Se for a primeira carga ou o usuário estava no final, role para baixo
+                setTimeout(() => {
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                }, 100);
+            }
+            
+            // Processa apenas as novas mensagens
+            if (hasNewMessages) {
+                const newMessages = data.mensagens.slice(lastMessageCount);
+                newMessages.forEach(m => {
+                    adicionarMensagem(m.autor, m.texto, m.data_envio, m.lida);
+                });
+            } else if (lastMessageCount === 0) {
+                // Primeira carga - renderiza todas as mensagens
+                data.mensagens.forEach(m => {
+                    adicionarMensagem(m.autor, m.texto, m.data_envio, m.lida);
+                });
+            }
+            
+            lastMessageCount = messageCount;
+            
             // Bloquear envio se ticket concluído e usuário for colaborador
             if(data.status === 'concluido' && '{{ request.user.role }}' === 'colaborador') {
-                textarea.disabled = true;
-                textarea.placeholder = 'Chamado concluído. Não é possível enviar mensagens.';
+                messageInput.disabled = true;
+                messageInput.placeholder = 'Chamado concluído. Não é possível enviar mensagens.';
+                sendBtn.disabled = true;
             } else {
-                textarea.disabled = false;
-                textarea.placeholder = 'Digite sua mensagem...';
+                messageInput.disabled = false;
+                messageInput.placeholder = 'Digite sua mensagem...';
+                sendBtn.disabled = false;
             }
-
-            data.mensagens.forEach(m => {
-                const p = document.createElement('div');
-                const isAutor = m.autor === '{{ request.user.username }}';
-                p.style.padding = '8px';
-                p.style.marginBottom = '5px';
-                p.style.borderRadius = '10px';
-                p.style.background = isAutor ? '#DCF8C6' : '#FFF';
-                p.innerHTML = `<strong>${m.autor}:</strong> ${m.texto}<br><span style="font-size:0.7em;color:gray;">${m.data_envio}</span>`;
-                chatBox.appendChild(p);
-            });
-            chatBox.scrollTop = chatBox.scrollHeight;
+        })
+        .catch(error => {
+            console.error('Erro ao carregar mensagens:', error);
         });
 }
 
-// Enviar mensagem
-document.getElementById('form-chat').addEventListener('submit', e => {
-    e.preventDefault();
-    const texto = document.getElementById('texto-mensagem').value;
-    if (!currentTicketId || !texto) return;
+// Adiciona uma mensagem ao chat (otimizada)
+function adicionarMensagem(autor, texto, data_envio, lida) {
+    const usuarioAtual = "{{ request.user.username }}";
+    const isAutor = autor === usuarioAtual;
+    
+    // Cria o elemento da mensagem
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${isAutor ? 'sent' : 'received'}`;
+    
+    // Avatar
+    const avatarDiv = document.createElement('div');
+    avatarDiv.className = 'message-avatar';
+    avatarDiv.textContent = autor.charAt(0).toUpperCase();
+    
+    // Conteúdo da mensagem
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'message-content';
+    
+    // Bolha da mensagem
+    const bubbleDiv = document.createElement('div');
+    bubbleDiv.className = 'message-bubble';
+    bubbleDiv.textContent = texto;
+    
+    // Informações da mensagem (autor e timestamp)
+    const infoDiv = document.createElement('div');
+    infoDiv.className = 'message-info';
+    
+    // Formata a data
+    const dataFormatada = formatarData(data_envio);
+    
+    if (isAutor) {
+        // Status da mensagem (enviada, recebida, lida)
+        const statusDiv = document.createElement('div');
+        statusDiv.className = 'message-status';
+        
+        if (lida) {
+            statusDiv.innerHTML = '<i class="fas fa-check-double" style="color: #4a90e2;"></i>';
+        } else {
+            statusDiv.innerHTML = '<i class="fas fa-check"></i>';
+        }
+        
+        infoDiv.appendChild(statusDiv);
+        infoDiv.appendChild(document.createTextNode(dataFormatada));
+    } else {
+        infoDiv.appendChild(document.createTextNode(`${autor} • ${dataFormatada}`));
+    }
+    
+    // Monta a estrutura da mensagem
+    contentDiv.appendChild(bubbleDiv);
+    contentDiv.appendChild(infoDiv);
+    messageDiv.appendChild(avatarDiv);
+    messageDiv.appendChild(contentDiv);
+    
+    // Adiciona ao chat com animação suave
+    messageDiv.style.opacity = '0';
+    messageDiv.style.transform = 'translateY(10px)';
+    chatBox.appendChild(messageDiv);
+    
+    // Animação de entrada suave
+    setTimeout(() => {
+        messageDiv.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        messageDiv.style.opacity = '1';
+        messageDiv.style.transform = 'translateY(0)';
+    }, 50);
+}
+// Formata a data da mensagem
+// Formata a data da mensagem com timezone de Brasília
+function formatarData(dataString) {
+    if (!dataString) return '';
+    
+    let data;
+    
+    // Tenta diferentes formatos de data
+    if (dataString.includes('T')) {
+        // Formato ISO (ex: "2023-10-25T14:30:00")
+        data = new Date(dataString);
+    } else if (dataString.includes('-') && dataString.includes(' ')) {
+        // Formato comum (ex: "2023-10-25 14:30:00")
+        const partes = dataString.split(' ');
+        const dataPart = partes[0];
+        const horaPart = partes[1] || '00:00:00';
+        data = new Date(`${dataPart}T${horaPart}`);
+    } else if (dataString.includes('/')) {
+        // Formato brasileiro (ex: "25/10/2023 14:30")
+        const partes = dataString.split(' ');
+        const dataPart = partes[0];
+        const horaPart = partes[1] || '00:00';
+        const [dia, mes, ano] = dataPart.split('/');
+        const [hora, minuto] = horaPart.split(':');
+        data = new Date(ano, mes - 1, dia, hora || 0, minuto || 0);
+    } else {
+        // Tentativa genérica
+        data = new Date(dataString);
+    }
+    
+    // Verifica se a data é válida
+    if (isNaN(data.getTime())) {
+        return dataString; // Retorna a string original se não conseguir parsear
+    }
+    
+    // Ajusta para o timezone de Brasília (UTC-3)
+    // Adiciona 3 horas se a data vier em UTC
+    const offsetBrasil = 3; // UTC-3
+    const dataBrasil = new Date(data.getTime() + (offsetBrasil * 60 * 60 * 1000));
+    
+    const hoje = new Date();
+    const hojeBrasil = new Date(hoje.getTime() + (offsetBrasil * 60 * 60 * 1000));
+    
+    // Se for hoje, mostra apenas a hora
+    if (dataBrasil.toDateString() === hojeBrasil.toDateString()) {
+        return dataBrasil.toLocaleTimeString('pt-BR', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: false 
+        });
+    }
+    
+    // Se for ontem, mostra "Ontem" e a hora
+    const ontem = new Date(hojeBrasil);
+    ontem.setDate(ontem.getDate() - 1);
+    
+    if (dataBrasil.toDateString() === ontem.toDateString()) {
+        return `Ontem ${dataBrasil.toLocaleTimeString('pt-BR', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: false 
+        })}`;
+    }
+    
+    // Se for este ano, mostra o dia e mês sem o ano
+    if (dataBrasil.getFullYear() === hojeBrasil.getFullYear()) {
+        return dataBrasil.toLocaleDateString('pt-BR', { 
+            day: '2-digit', 
+            month: '2-digit' 
+        }) + ' ' + dataBrasil.toLocaleTimeString('pt-BR', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: false 
+        });
+    }
+    
+    // Caso contrário, mostra a data completa
+    return dataBrasil.toLocaleDateString('pt-BR') + ' ' + 
+           dataBrasil.toLocaleTimeString('pt-BR', { 
+               hour: '2-digit', 
+               minute: '2-digit',
+               hour12: false 
+           });
+}
 
+// Envia uma mensagem
+function enviarMensagem() {
+    const texto = messageInput.value.trim();
+    if (!currentTicketId || !texto) return;
+    
+    // Desabilita o botão de envio enquanto processa
+    sendBtn.disabled = true;
+    
     const formData = new FormData();
     formData.append('texto', texto);
-
+    
     fetch(`/chat/${currentTicketId}/`, {
         method: 'POST',
-        headers: { 'X-CSRFToken': csrftoken },
+        headers: {'X-CSRFToken': csrftoken},
         body: formData
     })
-        .then(res => res.json())
-        .then(data => {
-            if (data.sucesso) {
-                document.getElementById('texto-mensagem').value = '';
-                carregarMensagens();
-            } else {
-                console.warn("Erro ao enviar mensagem:", data);
-            }
-        })
-        .catch(err => console.error("Erro no envio:", err));
+    .then(res => res.json())
+    .then(data => {
+        if (data.sucesso) {
+            messageInput.value = '';
+            // Ajusta a altura do textarea
+            messageInput.style.height = 'auto';
+            // Recarrega as mensagens
+            carregarMensagens();
+        } else {
+            console.error('Erro ao enviar mensagem:', data.erro);
+            // Mostra uma mensagem de erro (em uma implementação real)
+        }
+    })
+    .catch(error => {
+        console.error('Erro ao enviar mensagem:', error);
+        // Mostra uma mensagem de erro (em uma implementação real)
+    })
+    .finally(() => {
+        // Reabilita o botão de envio
+        sendBtn.disabled = false;
+        messageInput.focus();
+    });
+}
+
+// Event listeners para o envio de mensagens
+sendBtn.addEventListener('click', enviarMensagem);
+messageInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        enviarMensagem();
+    }
 });
 
-// Atualiza chat automaticamente a cada 2s
-setInterval(carregarMensagens, 2000);
+// Ajusta a altura do textarea conforme o conteúdo
+messageInput.addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    
+    // Simula indicador de digitação (em uma implementação real, isso seria enviado ao backend)
+    if (!isTyping) {
+        isTyping = true;
+        // Aqui você poderia enviar uma notificação ao backend que o usuário está digitando
+    }
+    
+    // Limpa o timeout anterior
+    clearTimeout(typingTimeout);
+    
+    // Define um novo timeout para parar o indicador de digitação após 1 segundo de inatividade
+    typingTimeout = setTimeout(() => {
+        isTyping = false;
+        // Aqui você poderia enviar uma notificação ao backend que o usuário parou de digitar
+    }, 1000);
+});
+
+// Abre/fecha o seletor de emojis
+emojiBtn.addEventListener('click', () => {
+    emojiPicker.classList.toggle('active');
+});
+
+// Fecha o seletor de emojis ao clicar fora
+document.addEventListener('click', (e) => {
+    if (!emojiBtn.contains(e.target) && !emojiPicker.contains(e.target)) {
+        emojiPicker.classList.remove('active');
+    }
+});
+
+// Simula anexo de arquivo (em uma implementação real, você implementaria o upload)
+attachBtn.addEventListener('click', () => {
+    // Cria um input de arquivo oculto
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*,application/pdf,.doc,.docx,.xls,.xlsx,.txt';
+    
+    fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            // Em uma implementação real, você faria o upload do arquivo aqui
+            // Por enquanto, apenas simulamos o envio de uma mensagem com o nome do arquivo
+            messageInput.value = `📎 Anexei o arquivo: ${file.name}`;
+            enviarMensagem();
+        }
+    });
+    
+    // Simula o clique no input de arquivo
+    fileInput.click();
+});
+
+// Respostas rápidas
+quickReplyBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        messageInput.value = btn.dataset.message;
+        messageInput.focus();
+    });
+});
+
+// Notificação de novas mensagens
+newMessageNotification.addEventListener('click', () => {
+    chatBox.scrollTop = chatBox.scrollHeight;
+    newMessageNotification.style.display = 'none';
+});
+
+// Inicializa o seletor de emojis
+initEmojiPicker();
+
 document.addEventListener("DOMContentLoaded", function () {
     // Elements
     const notifIcon = document.getElementById("notif-icon");
