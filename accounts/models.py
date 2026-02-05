@@ -35,6 +35,12 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return f"{self.username} ({self.role})"
+# models.py
+
+from django.db import models
+from django.conf import settings
+from django.utils import timezone
+
 class Ticket(models.Model):
     STATUS_CHOICES = (
         ('ativo', 'Ativo'),
@@ -57,6 +63,11 @@ class Ticket(models.Model):
     )  # técnico responsável (opcional)
     data_criacao = models.DateTimeField(default=timezone.now)
     data_fechamento = models.DateTimeField(null=True, blank=True)
+
+    # --- CAMPOS ADICIONADOS ---
+    unread_count_for_colaborador = models.PositiveIntegerField(default=0)
+    unread_count_for_tecnico = models.PositiveIntegerField(default=0)
+    # --- FIM DOS CAMPOS ADICIONADOS ---
 
     def __str__(self):
         return f"{self.titulo} ({self.status})"
@@ -87,8 +98,7 @@ class Mensagem(models.Model):
 
     def __str__(self):
         return f"{self.autor.username} - {self.ticket.titulo} - {self.data_envio.strftime('%d/%m %H:%M')}"
-    
-    from django.db import models
+from django.db import models
 from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth import get_user_model

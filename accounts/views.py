@@ -47,40 +47,47 @@ from django.core.paginator import Paginator
 # --- Tela principal de chamados ---
 from django.core.mail import send_mail
 from django.conf import settings
-from .utils import notify_new_ticket, notify_ticket_closed
-from django.core.paginator import Paginator
-from django.contrib import messages
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from django.utils import timezone
-from .models import Ticket
 
 @login_required
 def chamados_colaborador(request):
     if request.user.role not in ['colaborador', 'admin']:
         return redirect('index')
 
+    # Pega todos os chamados do colaborador logado
     chamados_list = Ticket.objects.filter(colaborador=request.user)
-    paginator = Paginator(chamados_list, 5)  # 5 chamados por página
-    page_number = request.GET.get('page')
-    chamados = paginator.get_page(page_number)
 
+    # Separa em duas listas: ativos e concluídos
+    chamados_ativos_list = chamados_list.filter(status='ativo')
+    chamados_concluidos_list = chamados_list.filter(status='concluido')
+
+    # Pagina a lista de chamados ATIVOS
+    paginator_ativos = Paginator(chamados_ativos_list, 5)  # 5 chamados por página
+    page_number_ativos = request.GET.get('page_ativos') # Usa um parâmetro de URL único
+    chamados_ativos = paginator_ativos.get_page(page_number_ativos)
+
+    # Pagina a lista de chamados CONCLUÍDOS
+    paginator_concluidos = Paginator(chamados_concluidos_list, 5)
+    page_number_concluidos = request.GET.get('page_concluidos') # Usa outro parâmetro de URL único
+    chamados_concluidos = paginator_concluidos.get_page(page_number_concluidos)
+
+    # Lógica para criar um NOVO chamado (permanece a mesma)
     if request.method == 'POST':
-        ativos = chamados_list.filter(status='ativo').count()
-        if ativos >= 3:
+        # Conta quantos chamados ATIVOS o usuário tem
+        if chamados_ativos_list.count() >= 3:
             messages.error(request, "Você já possui 3 chamados ativos.")
         else:
             titulo = request.POST.get('titulo')
             descricao = request.POST.get('descricao')
 
-            # Cria o ticket
+            # Cria o ticket com status 'ativo' por padrão
             novo_ticket = Ticket.objects.create(
                 titulo=titulo,
                 descricao=descricao,
-                colaborador=request.user
+                colaborador=request.user,
+                status='ativo'  # <-- IMPORTANTE: Garante que novos chamados sejam ativos
             )
 
-            # --- Envio de e-mail automático ---
+            # --- Envio de e-mail automático (permanece o mesmo) ---
             assunto = f"Novo chamado aberto: {novo_ticket.titulo}"
             mensagem = (
                 f"Olá {request.user.username},\n\n"
@@ -100,15 +107,19 @@ def chamados_colaborador(request):
                 fail_silently=False,
             )
 
-            # --- Notificação em tempo real (sino) ---
-            notify_new_ticket(novo_ticket)
-
-            messages.success(request, "Chamado criado com sucesso! E-mail e notificação enviados.")
+            messages.success(request, "Chamado criado com sucesso! Um e-mail de confirmação foi enviado.")
             return redirect('chamados_colaborador')
 
-    return render(request, 'accounts/chamados_colaborador.html', {'chamados': chamados})
+    # Renderiza o template passando as DUAS listas paginadas
+    return render(request, 'accounts/chamados_colaborador.html', {
+        'chamados_ativos': chamados_ativos,
+        'chamados_concluidos': chamados_concluidos
+    })
 
 # --- Tela de chamados para técnico ---
+from django.core.mail import send_mail
+from django.conf import settings
+
 @login_required
 def chamados_tecnico(request):
     if request.user.role != 'tecnico':
@@ -128,7 +139,7 @@ def chamados_tecnico(request):
 
     if request.method == 'POST':
         ticket_id = request.POST.get('ticket_id')
-        ticket = get_object_or_404(Ticket, id=ticket_id)
+        ticket = Ticket.objects.get(id=ticket_id)
         ticket.status = 'concluido'
         ticket.data_fechamento = timezone.now()
         ticket.tecnico = request.user
@@ -146,24 +157,24 @@ def chamados_tecnico(request):
             f"Agradecemos por utilizar nosso suporte.\n"
             f"Atenciosamente,\nEquipe de Suporte"
         )
+
         send_mail(
             assunto,
             mensagem,
             settings.DEFAULT_FROM_EMAIL,
-            [ticket.colaborador.email],
+            [ticket.colaborador.email],  # envia para o dono do chamado
             fail_silently=False,
         )
 
-        # --- Notificação em tempo real para o colaborador e outros técnicos ---
-        notify_ticket_closed(ticket, request.user)
-
-        messages.success(request, "Chamado concluído! E-mail e notificação enviados.")
+        messages.success(request, "Chamado concluído! E-mail enviado ao colaborador.")
         return redirect('chamados_tecnico')
 
     return render(request, 'accounts/chamados_tecnico.html', {
         'chamados_ativos': chamados_ativos,
         'chamados_concluidos': chamados_concluidos
     })
+
+
 # --- Tela para admin (visualizar tudo) ---
 @login_required
 def chamados_admin(request):
@@ -354,11 +365,10 @@ def graficos_tickets(request):
     }
 
     return render(request, 'accounts/graficos_tickets.html', contexto)
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import login_required
-from .models import Ticket, Mensagem
 from django.shortcuts import get_object_or_404, render
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from .models import Ticket, Mensagem, Notificacao # Certifique-se de importar Notificacao
 
 @login_required
 def chat_ticket(request, ticket_id):
@@ -368,17 +378,50 @@ def chat_ticket(request, ticket_id):
     if not (request.user.role == 'tecnico' or request.user == ticket.colaborador or request.user.role == 'admin'):
         return JsonResponse({'erro': 'Acesso negado'}, status=403)
 
-    # Bloquear colaborador se o ticket estiver concluído
+    # LÓGICA DE POST (ENVIO DE MENSAGEM)
     if request.method == 'POST':
         if ticket.status == 'concluido' and request.user.role == 'colaborador':
             return JsonResponse({'erro': 'Não é possível enviar mensagens em chamado concluído.'}, status=403)
 
         texto = request.POST.get('texto')
         if texto:
+            # Cria a mensagem
             Mensagem.objects.create(ticket=ticket, autor=request.user, texto=texto)
+
+            # --- LÓGICA DE NOTIFICAÇÃO E CONTADOR ---
+            recipient = None
+            # Se o autor é o colaborador, o destinatário é o técnico (ou admin)
+            if request.user == ticket.colaborador:
+                if ticket.tecnico:
+                    recipient = ticket.tecnico
+                else:
+                    # Se não há técnico, notifica um admin (simplificação)
+                    admin_user = User.objects.filter(role='admin').first()
+                    if admin_user:
+                        recipient = admin_user
+                ticket.unread_count_for_tecnico += 1
+            
+            # Se o autor é um técnico ou admin, o destinatário é o colaborador
+            elif request.user.role in ['tecnico', 'admin']:
+                recipient = ticket.colaborador
+                ticket.unread_count_for_colaborador += 1
+            
+            # Salva o contador atualizado no ticket
+            ticket.save()
+
+            # Cria a notificação no sistema, se houver um destinatário
+            if recipient:
+                Notificacao.objects.create(
+                    recipient=recipient,
+                    titulo=f"Nova mensagem no chat: {ticket.titulo}",
+                    mensagem=f"{request.user.username} te enviou uma mensagem.",
+                    target_url=f"/chat/{ticket.id}/" # Link direto para o chat
+                )
+
             return JsonResponse({'sucesso': True})
 
-    # Para GET ou atualização
+    # LÓGICA DE GET (CARREGAR MENSAGENS)
+    # (seu código GET permanece o mesmo)
     mensagens = ticket.mensagens.order_by('data_envio').values(
         'autor__username', 'texto', 'data_envio'
     )
@@ -390,6 +433,39 @@ def chat_ticket(request, ticket_id):
         } for m in mensagens
     ]
     return JsonResponse({'mensagens': mensagens_list, 'status': ticket.status})
+@login_required
+def marcar_chat_como_lido(request, ticket_id):
+    if request.method != 'POST':
+        return JsonResponse({'erro': 'Método não permitido'}, status=405)
+
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+    
+    # 1. Verificação de Permissão (Correção)
+    # Permitimos que qualquer técnico/admin leia, não apenas o atribuído, 
+    # pois na tela 'chamados_tecnico' você lista todos os ativos.
+    is_colaborador = request.user == ticket.colaborador
+    is_tecnico_or_admin = request.user.role in ['tecnico', 'admin']
+
+    if not (is_colaborador or is_tecnico_or_admin):
+        return JsonResponse({'erro': 'Acesso negado'}, status=403)
+
+    # 2. Zerar o contador no Ticket (Modelo Ticket)
+    if is_colaborador:
+        ticket.unread_count_for_colaborador = 0
+    elif is_tecnico_or_admin:
+        # Permite que QUALQUER técnico/admin limpe o contador de visualização técnica
+        ticket.unread_count_for_tecnico = 0
+    
+    ticket.save()
+
+    # 3. Marcar Notificações Gerais como lidas (Correção do Sino/Bell)
+    # Busca notificações desse usuário relacionadas a esse chat e marca como lida
+    Notificacao.objects.filter(
+        recipient=request.user,
+        target_url__icontains=f"/chat/{ticket_id}/" # Verifica se a URL da notificação bate com o chat atual
+    ).update(is_read=True)
+    
+    return JsonResponse({'sucesso': True})
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from .models import Notificacao
@@ -436,4 +512,5 @@ def marcar_como_lida(request, notif_id):
     n.is_read = True
     n.save()
     return JsonResponse({'sucesso': True, 'target_url': n.target_url})
+
 
